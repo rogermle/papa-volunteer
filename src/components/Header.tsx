@@ -128,6 +128,14 @@ export function Header({ initialAdmin = false }: HeaderProps) {
                   >
                     My Events
                   </Link>
+                  <Link
+                    href="/my-schedule"
+                    className="block px-3 py-2 text-sm text-foreground hover:bg-papa-card"
+                    role="menuitem"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    My schedule
+                  </Link>
                   <form action="/auth/signout" method="post" className="block">
                     <button
                       type="submit"

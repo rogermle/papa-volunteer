@@ -64,6 +64,7 @@ export async function signUpForEvent(formData: FormData) {
   if (error) return { error: error.message }
   revalidatePath(`/events/${eventId}`)
   revalidatePath('/my-signups')
+  revalidatePath('/my-schedule')
   revalidatePath('/calendar')
   return { ok: true, waitlist: atCapacity }
 }
@@ -84,6 +85,7 @@ export async function leaveEvent(formData: FormData) {
 
   revalidatePath(`/events/${eventId}`)
   revalidatePath('/my-signups')
+  revalidatePath('/my-schedule')
   revalidatePath('/calendar')
   return { ok: true }
 }

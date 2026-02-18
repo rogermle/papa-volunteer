@@ -3,8 +3,9 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
-import { TIMEZONE_LABELS, formatTimeLocal } from '@/lib/types/database'
-import type { Timezone } from '@/lib/types/database'
+import { TIMEZONE_LABELS, formatTimeLocal, formatScheduleDay, formatScheduleTimeWithTz } from '@/lib/types/database'
+import type { Timezone, VolunteerScheduleRow } from '@/lib/types/database'
+import { geocodeAddress, looksLikeAddress } from '@/lib/geocode'
 import { EventActionBanner } from './EventActionBanner'
 import { EventSignupButtons } from './EventSignupButtons'
 
@@ -69,6 +70,10 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
 
   const formatDate = (d: string) => new Date(d + 'Z').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
   const timeStr = [formatTimeLocal(event.start_time), formatTimeLocal(event.end_time)].filter(Boolean).join(' – ') || null
+
+  const mapCoords = event.location && looksLikeAddress(event.location)
+    ? await geocodeAddress(event.location)
+    : null
 
   return (
     <div className="flex flex-col gap-6">
@@ -139,6 +144,85 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
         </div>
         </div>
       </div>
+      {mapCoords && (
+        <div className="rounded-xl border border-papa-border bg-papa-card overflow-hidden shadow-sm">
+          <div className="border-b border-papa-border bg-papa-card px-4 py-2">
+            <h2 className="font-medium text-foreground">Location</h2>
+            <p className="text-sm text-papa-muted">{event.location}</p>
+          </div>
+          <div className="relative aspect-[21/9] w-full min-h-[200px] bg-papa-muted/20">
+            <iframe
+              title="Event location map"
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapCoords.lon - 0.02},${mapCoords.lat - 0.02},${mapCoords.lon + 0.02},${mapCoords.lat + 0.02}&layer=mapnik&marker=${mapCoords.lat},${mapCoords.lon}`}
+              className="absolute inset-0 h-full w-full border-0"
+              loading="lazy"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <div className="border-t border-papa-border px-4 py-2 text-xs text-papa-muted">
+            ©{' '}
+            <a
+              href="https://www.openstreetmap.org/copyright"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-papa-accent hover:underline"
+            >
+              OpenStreetMap
+            </a>
+            {' '}contributors.{' '}
+            <a
+              href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(event.location ?? '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-papa-accent hover:underline"
+            >
+              Open in OpenStreetMap →
+            </a>
+          </div>
+        </div>
+      )}
+      {mySignup && (event.volunteer_schedule?.length > 0 || event.volunteer_details) && (
+        <div className="rounded-xl border border-papa-border bg-papa-card p-6 shadow-sm">
+          <h2 className="font-medium text-foreground">Event info for volunteers</h2>
+          <p className="mt-1 text-xs text-papa-muted">
+            Schedule, room, venue, and other details from the coordinator. Update anytime in Admin.
+          </p>
+          {event.volunteer_schedule?.length > 0 && (
+            <div className="mt-4 overflow-x-auto">
+              <table className="min-w-full border-collapse text-left text-sm">
+                <thead>
+                  <tr className="border-b border-papa-border bg-papa-muted/20">
+                    <th className="px-3 py-2 font-medium text-foreground">Day</th>
+                    <th className="px-3 py-2 font-medium text-foreground">Time</th>
+                    <th className="px-3 py-2 font-medium text-foreground">Event</th>
+                    <th className="px-3 py-2 font-medium text-foreground">Room(s)</th>
+                    <th className="px-3 py-2 font-medium text-foreground">Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(event.volunteer_schedule as VolunteerScheduleRow[]).map((row, i) => (
+                    <tr key={i} className="border-b border-papa-border/60 last:border-0">
+                      <td className="px-3 py-2 text-foreground">{formatScheduleDay(row.day)}</td>
+                      <td className="px-3 py-2 text-foreground">{formatScheduleTimeWithTz(row.time ?? '', tz)}</td>
+                      <td className="px-3 py-2 text-foreground">{row.event || '—'}</td>
+                      <td className="px-3 py-2 text-foreground">{row.room || '—'}</td>
+                      <td className="px-3 py-2 text-foreground">{row.notes || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {event.volunteer_details && (
+            <div className="mt-4">
+              <h3 className="text-sm font-medium text-foreground">Full coordinator email / details</h3>
+              <div className="mt-2 whitespace-pre-wrap rounded-lg border border-papa-border bg-background p-4 text-sm text-foreground">
+                {event.volunteer_details}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       <div className="rounded-xl border border-papa-border bg-papa-card p-6 shadow-sm">
         <h2 className="font-medium text-foreground">
           Volunteers ({confirmed.length} / {event.capacity})

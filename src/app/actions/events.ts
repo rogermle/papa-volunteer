@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import type { Timezone } from '@/lib/types/database'
+import type { Timezone, VolunteerScheduleRow } from '@/lib/types/database'
 
 const TIMEZONES: Timezone[] = ['America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles']
 
@@ -17,6 +17,27 @@ function parseFormEvent(formData: FormData) {
   const description = (formData.get('description') as string)?.trim() || null
   const external_link = (formData.get('external_link') as string)?.trim() || null
   const image_url = (formData.get('image_url') as string)?.trim() || null
+  const volunteer_details = (formData.get('volunteer_details') as string)?.trim() || null
+  let volunteer_schedule: VolunteerScheduleRow[] = []
+  try {
+    const raw = formData.get('volunteer_schedule')
+    if (typeof raw === 'string' && raw) {
+      const parsed = JSON.parse(raw) as unknown
+      if (Array.isArray(parsed)) {
+        volunteer_schedule = parsed
+          .filter((r) => r && typeof r === 'object' && 'day' in r && 'time' in r && 'event' in r && 'room' in r)
+          .map((r) => ({
+            day: String((r as VolunteerScheduleRow).day ?? ''),
+            time: String((r as VolunteerScheduleRow).time ?? ''),
+            event: String((r as VolunteerScheduleRow).event ?? ''),
+            room: String((r as VolunteerScheduleRow).room ?? ''),
+            notes: String((r as VolunteerScheduleRow).notes ?? '').trim() || undefined,
+          }))
+      }
+    }
+  } catch {
+    volunteer_schedule = []
+  }
   const capacity = parseInt(String(formData.get('capacity')), 10)
   if (!title || !start_date || !end_date || !timezone || TIMEZONES.includes(timezone) === false || capacity < 1) {
     return { error: 'Missing or invalid fields.' }
@@ -32,6 +53,8 @@ function parseFormEvent(formData: FormData) {
     description,
     external_link,
     image_url,
+    volunteer_details,
+    volunteer_schedule,
     capacity,
   }
 }

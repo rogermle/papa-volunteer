@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* PAPA / asianpilots.org–aligned theme: navy, white, professional */
+/* PAPA / asianpilots.org–aligned theme: navy, red, white, professional */
 :root {
   --background: #ffffff;
   --foreground: #1e293b;
@@ -10,6 +10,7 @@
   --papa-accent-hover: #991b1b;
   --papa-muted: #64748b;
   --papa-border: #e2e8f0;
+  --papa-form-border: #94a3b8;
   --papa-card: #f8fafc;
 }
 
@@ -22,6 +23,7 @@
   --color-papa-accent-hover: var(--papa-accent-hover);
   --color-papa-muted: var(--papa-muted);
   --color-papa-border: var(--papa-border);
+  --color-papa-form-border: var(--papa-form-border);
   --color-papa-card: var(--papa-card);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -33,6 +35,22 @@ body {
   font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
 }
 
+/* Form controls: stronger contrast + PAPA red focus */
+.papa-form-input {
+  border-width: 1px;
+  border-color: var(--papa-form-border);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.papa-form-input:focus {
+  outline: none;
+  border-color: var(--papa-accent);
+  box-shadow: 0 0 0 2px rgba(185, 28, 28, 0.2);
+}
+.papa-form-label {
+  color: var(--papa-navy);
+  font-weight: 600;
+}
+
 /* Override dark mode: keep PAPA light theme as default to match main site */
 @media (prefers-color-scheme: dark) {
   :root {
@@ -42,6 +60,7 @@ body {
     --papa-navy-dark: #1e3a8a;
     --papa-muted: #94a3b8;
     --papa-border: #334155;
+    --papa-form-border: #475569;
     --papa-card: #1e293b;
   }
 }

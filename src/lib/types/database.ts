@@ -12,6 +12,15 @@ export interface Profile {
   updated_at: string
 }
 
+/** One row in the volunteer schedule table (multiple rooms/times per event). */
+export interface VolunteerScheduleRow {
+  day: string
+  time: string
+  event: string
+  room: string
+  notes?: string
+}
+
 export interface Event {
   id: string
   title: string
@@ -24,6 +33,8 @@ export interface Event {
   description: string | null
   external_link: string | null
   image_url: string | null
+  volunteer_details: string | null
+  volunteer_schedule: VolunteerScheduleRow[]
   capacity: number
   created_at: string
   updated_at: string
@@ -54,6 +65,39 @@ export const TIMEZONE_LABELS: Record<Timezone, string> = {
   'America/Chicago': 'Central',
   'America/Denver': 'Mountain',
   'America/Los_Angeles': 'Pacific',
+}
+
+/** Format a schedule row day (YYYY-MM-DD or "Thu") for display, including year. */
+export function formatScheduleDay(day: string): string {
+  if (!day) return '—'
+  if (/^\d{4}-\d{2}-\d{2}$/.test(day)) {
+    const d = new Date(day + 'T12:00:00')
+    return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+  }
+  return day
+}
+
+/** Parse "HH:MM" or "HH:MM–HH:MM" to 12h AM/PM. */
+function scheduleTimeTo12h(part: string): string {
+  const s = part.trim()
+  if (!s) return ''
+  const [h, m] = s.split(':')
+  const hour = parseInt(h ?? '0', 10)
+  if (Number.isNaN(hour)) return s
+  const minute = (m ?? '00').slice(0, 2)
+  const ampm = hour >= 12 ? 'PM' : 'AM'
+  const h12 = hour % 12 || 12
+  return `${h12}:${minute} ${ampm}`
+}
+
+/** Format schedule row time with timezone (e.g. "6:00 PM – 8:00 PM Eastern"). */
+export function formatScheduleTimeWithTz(time: string, tzLabel: string): string {
+  if (!time || !tzLabel) return time ? `${time} ${tzLabel}` : '—'
+  const parts = time.split(/[-–]/).map((p) => p.trim())
+  const start = scheduleTimeTo12h(parts[0] ?? '')
+  const end = parts[1] ? scheduleTimeTo12h(parts[1]) : ''
+  const timeStr = end ? `${start} – ${end}` : start
+  return `${timeStr} ${tzLabel}`
 }
 
 /** Format a time string (HH:MM:SS or HH:MM) as event-local "8:00 AM" (no UTC conversion). */
