@@ -65,7 +65,7 @@ export const TIMEZONE_LABELS: Record<Timezone, string> = {
   'America/Chicago': 'Central',
   'America/Denver': 'Mountain',
   'America/Los_Angeles': 'Pacific',
-  'Pacific/Honolulu': 'Hawaii-Aleutian',
+  'Pacific/Honolulu': 'Hawaii',
 }
 
 /** Format a schedule row day (YYYY-MM-DD or "Thu") for display, including year. */
