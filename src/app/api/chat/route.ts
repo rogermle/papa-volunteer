@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       model: "text-embedding-3-small",
       input: message,
     });
-    const embedding = Array.isArray(embedList) ? embedList[0]?.embedding : embedList?.data?.[0]?.embedding;
+    const embedding = embedList?.[0]?.embedding;
     if (!embedding) {
       return NextResponse.json({ error: "Failed to process question." }, { status: 500 });
     }
