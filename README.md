@@ -144,6 +144,8 @@ Future pushes to your main branch will trigger automatic production deploys. Pre
 - `npm run build` – production build
 - `npm run start` – run production build
 
+**Do not run `npm audit fix --force`.** It will flip between eslint@10 and eslint@4 (breaking the linter) and introduce more vulnerabilities. The remaining moderate advisories are in eslint’s dev dependency (ajv); they are dev-only and low risk. Stay on eslint@10.
+
 ## User flow
 
 1. **Home** shows an aviation hero and a link to **Events**.
