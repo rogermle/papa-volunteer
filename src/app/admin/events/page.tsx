@@ -8,7 +8,7 @@ export default async function AdminEventsPage() {
   const { data: events } = await supabase
     .from('events')
     .select('id, title, start_date, end_date, timezone, capacity')
-    .order('start_date', { ascending: false })
+    .order('start_date', { ascending: true })
 
   const eventIds = (events ?? []).map((e) => e.id)
   const { data: signups } = eventIds.length
