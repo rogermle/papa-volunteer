@@ -10,6 +10,8 @@ type MySignup = {
   waitlist_position: number | null
   volunteer_status: string | null
   phone: string | null
+  is_local: boolean | null
+  flight_voucher_requested: boolean | null
   availability_notes: string | null
   travel_notes: string | null
 }
@@ -60,7 +62,7 @@ export function EventSignupButtons({ eventId, capacity, confirmedCount, mySignup
 
   if (mySignup) {
     const onWaitlist = mySignup.waitlist_position != null
-    const hasDetails = mySignup.volunteer_status || mySignup.phone || mySignup.availability_notes || mySignup.travel_notes
+    const hasDetails = mySignup.volunteer_status || mySignup.phone != null || mySignup.is_local != null || mySignup.flight_voucher_requested != null || mySignup.availability_notes || mySignup.travel_notes
     return (
       <div className="mt-2 w-full rounded-xl border border-green-200 bg-green-50/80 p-4">
         <div className="flex flex-wrap items-center gap-2">
@@ -80,6 +82,18 @@ export function EventSignupButtons({ eventId, capacity, confirmedCount, mySignup
               <>
                 <dt className="font-medium text-green-800">Phone</dt>
                 <dd>{mySignup.phone}</dd>
+              </>
+            )}
+            {mySignup.is_local != null && (
+              <>
+                <dt className="font-medium text-green-800">Local to event</dt>
+                <dd>{mySignup.is_local ? 'Yes' : 'No'}</dd>
+              </>
+            )}
+            {mySignup.flight_voucher_requested != null && (
+              <>
+                <dt className="font-medium text-green-800">Flight voucher requested</dt>
+                <dd>{mySignup.flight_voucher_requested ? 'Yes' : 'No'}</dd>
               </>
             )}
             {mySignup.availability_notes && (

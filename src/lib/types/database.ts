@@ -36,6 +36,8 @@ export interface EventSignup {
   waitlist_position: number | null
   volunteer_status: string | null
   phone: string | null
+  is_local: boolean | null
+  flight_voucher_requested: boolean | null
   availability_notes: string | null
   travel_notes: string | null
   created_at: string

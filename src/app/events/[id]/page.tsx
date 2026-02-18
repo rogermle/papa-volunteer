@@ -1,3 +1,4 @@
+import { unstable_noStore as noStore } from 'next/cache'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -7,6 +8,8 @@ import type { Timezone } from '@/lib/types/database'
 import { EventActionBanner } from './EventActionBanner'
 import { EventSignupButtons } from './EventSignupButtons'
 
+export const dynamic = 'force-dynamic'
+
 function profileName(profiles: unknown): string | null {
   if (profiles && typeof profiles === 'object' && 'discord_username' in profiles)
     return (profiles as { discord_username: string | null }).discord_username
@@ -14,26 +17,54 @@ function profileName(profiles: unknown): string | null {
 }
 
 export default async function EventPage({ params }: { params: Promise<{ id: string }> }) {
+  noStore()
   const { id } = await params
   const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+
   const { data: event } = await supabase.from('events').select('*').eq('id', id).single()
   if (!event) notFound()
 
   const { data: signups } = await supabase
     .from('event_signups')
     .select(`
-      id, user_id, waitlist_position, volunteer_status, phone, availability_notes, travel_notes, created_at,
+      id, user_id, waitlist_position, volunteer_status, phone, is_local, flight_voucher_requested, availability_notes, travel_notes, created_at,
       profiles:user_id ( discord_username )
     `)
     .eq('event_id', id)
     .order('waitlist_position', { ascending: true, nullsFirst: true })
     .order('created_at', { ascending: true })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  const mySignup = user ? signups?.find((s) => s.user_id === user.id) : null
+  type SignupRow = NonNullable<typeof signups> extends (infer R)[] ? R : never
+  let mySignup: SignupRow | null = null
+  if (user) {
+    const mine = signups?.find((s) => String(s.user_id).toLowerCase() === String(user.id).toLowerCase())
+    if (mine) {
+      mySignup = mine
+    } else {
+      const { data: direct } = await supabase
+        .from('event_signups')
+        .select('id, user_id, waitlist_position, volunteer_status, phone, is_local, flight_voucher_requested, availability_notes, travel_notes, created_at')
+        .eq('event_id', id)
+        .eq('user_id', user.id)
+        .maybeSingle()
+      if (direct) {
+        mySignup = { ...direct, profiles: null } as unknown as SignupRow
+      }
+    }
+  }
 
-  const confirmed = signups?.filter((s) => s.waitlist_position == null) ?? []
-  const waitlist = signups?.filter((s) => s.waitlist_position != null) ?? []
+  const signupsForList = (() => {
+    const list = signups ?? []
+    if (!mySignup) return list
+    const alreadyInList = list.some((s) => String(s.user_id).toLowerCase() === String(mySignup!.user_id).toLowerCase())
+    if (alreadyInList) return list
+    return [mySignup, ...list]
+  })()
+
+  const confirmed = signupsForList.filter((s) => s.waitlist_position == null)
+  const waitlist = signupsForList.filter((s) => s.waitlist_position != null)
   const tz = TIMEZONE_LABELS[event.timezone as Timezone] ?? event.timezone
 
   const formatDate = (d: string) => new Date(d + 'Z').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
@@ -98,6 +129,8 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
               waitlist_position: mySignup.waitlist_position,
               volunteer_status: mySignup.volunteer_status ?? null,
               phone: mySignup.phone ?? null,
+              is_local: mySignup.is_local ?? null,
+              flight_voucher_requested: mySignup.flight_voucher_requested ?? null,
               availability_notes: mySignup.availability_notes ?? null,
               travel_notes: mySignup.travel_notes ?? null,
             } : null}

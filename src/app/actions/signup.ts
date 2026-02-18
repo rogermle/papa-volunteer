@@ -42,7 +42,11 @@ export async function signUpForEvent(formData: FormData) {
   }
 
   const volunteerStatus = (formData.get('volunteer_status') as string)?.trim() || null
-  const phone = (formData.get('phone') as string)?.trim() || null
+  const phoneRaw = (formData.get('phone') as string)?.trim() || ''
+  const phone = phoneRaw.replace(/\D/g, '').length >= 10 ? phoneRaw : null
+  if (!phone) return { error: 'A valid phone number (10 digits) is required.' }
+  const isLocal = formData.get('is_local') === 'on'
+  const flightVoucherRequested = formData.get('flight_voucher_requested') === 'on'
   const availabilityNotes = (formData.get('availability_notes') as string)?.trim() || null
   const travelNotes = (formData.get('travel_notes') as string)?.trim() || null
 
@@ -52,6 +56,8 @@ export async function signUpForEvent(formData: FormData) {
     waitlist_position: waitlistPosition,
     volunteer_status: volunteerStatus,
     phone,
+    is_local: isLocal,
+    flight_voucher_requested: flightVoucherRequested,
     availability_notes: availabilityNotes,
     travel_notes: travelNotes,
   })

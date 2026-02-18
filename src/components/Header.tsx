@@ -1,60 +1,70 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
-type HeaderProps = { initialAdmin?: boolean }
+type HeaderProps = { initialAdmin?: boolean };
 
 export function Header({ initialAdmin = false }: HeaderProps) {
-  const [user, setUser] = useState<{ id: string; email?: string } | null>(null)
-  const [profile, setProfile] = useState<{ discord_username: string | null; display_name: string | null; is_admin: boolean } | null>(null)
-  const [menuOpen, setMenuOpen] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
-  const router = useRouter()
-  const isAdmin = profile?.is_admin ?? initialAdmin
-  const displayName = profile?.display_name ?? profile?.discord_username ?? user?.email ?? 'Account'
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  const [profile, setProfile] = useState<{
+    discord_username: string | null;
+    display_name: string | null;
+    is_admin: boolean;
+  } | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const isAdmin = profile?.is_admin ?? initialAdmin;
+  const displayName =
+    profile?.display_name ??
+    profile?.discord_username ??
+    user?.email ??
+    "Account";
 
   useEffect(() => {
-    const client = createClient()
+    const client = createClient();
     client.auth.getUser().then(({ data: { user: u } }) => {
-      setUser(u ?? null)
+      setUser(u ?? null);
       if (u) {
         client
-          .from('profiles')
-          .select('discord_username, display_name, is_admin')
-          .eq('id', u.id)
+          .from("profiles")
+          .select("discord_username, display_name, is_admin")
+          .eq("id", u.id)
           .maybeSingle()
           .then(({ data, error }) => {
-            if (error) console.error('Header profile fetch:', error.message, error.code)
-            setProfile(data ?? null)
-          })
+            if (error)
+              console.error("Header profile fetch:", error.message, error.code);
+            setProfile(data ?? null);
+          });
       } else {
-        setProfile(null)
+        setProfile(null);
       }
-    })
+    });
     const {
       data: { subscription },
-    } = client.auth.onAuthStateChange(() => router.refresh())
-    return () => subscription.unsubscribe()
-  }, [router])
+    } = client.auth.onAuthStateChange(() => router.refresh());
+    return () => subscription.unsubscribe();
+  }, [router]);
 
   useEffect(() => {
-    if (!menuOpen) return
+    if (!menuOpen) return;
     function handleClick(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false)
+      if (menuRef.current && !menuRef.current.contains(e.target as Node))
+        setMenuOpen(false);
     }
     function handleKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setMenuOpen(false)
+      if (e.key === "Escape") setMenuOpen(false);
     }
-    document.addEventListener('click', handleClick)
-    document.addEventListener('keydown', handleKey)
+    document.addEventListener("click", handleClick);
+    document.addEventListener("keydown", handleKey);
     return () => {
-      document.removeEventListener('click', handleClick)
-      document.removeEventListener('keydown', handleKey)
-    }
-  }, [menuOpen])
+      document.removeEventListener("click", handleClick);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [menuOpen]);
 
   return (
     <header className="border-b border-papa-border bg-papa-navy px-4 py-3 text-white">
@@ -63,11 +73,17 @@ export function Header({ initialAdmin = false }: HeaderProps) {
           PAPA Volunteer
         </Link>
         <nav className="flex items-center gap-4">
-          <Link href="/events" className="text-sm text-white/90 hover:text-white">
+          <Link
+            href="/events"
+            className="text-sm text-white/90 hover:text-white"
+          >
             Events
           </Link>
           {isAdmin && (
-            <Link href="/admin/events" className="text-sm text-white/90 hover:text-white">
+            <Link
+              href="/admin/events"
+              className="text-sm text-white/90 hover:text-white"
+            >
               Admin
             </Link>
           )}
@@ -81,8 +97,19 @@ export function Header({ initialAdmin = false }: HeaderProps) {
                 aria-haspopup="true"
               >
                 <span>{displayName}</span>
-                <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <svg
+                  className="h-4 w-4 shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </button>
               {menuOpen && (
@@ -99,7 +126,7 @@ export function Header({ initialAdmin = false }: HeaderProps) {
                     role="menuitem"
                     onClick={() => setMenuOpen(false)}
                   >
-                    My profile
+                    My Events
                   </Link>
                   <form action="/auth/signout" method="post" className="block">
                     <button
@@ -126,5 +153,5 @@ export function Header({ initialAdmin = false }: HeaderProps) {
         </nav>
       </div>
     </header>
-  )
+  );
 }

@@ -21,9 +21,10 @@ type Props = {
   defaultValue?: string
   className?: string
   id?: string
+  required?: boolean
 }
 
-export function PhoneInput({ name, placeholder = '(555) 123-4567', defaultValue = '', className, id: propId }: Props) {
+export function PhoneInput({ name, placeholder = '(555) 123-4567', defaultValue = '', className, id: propId, required }: Props) {
   const fallbackId = useId()
   const id = propId ?? fallbackId
   const [value, setValue] = useState(defaultValue ? formatPhone(defaultValue) : '')
@@ -60,6 +61,7 @@ export function PhoneInput({ name, placeholder = '(555) 123-4567', defaultValue 
       onPaste={handlePaste}
       className={className}
       maxLength={14}
+      required={required}
     />
   )
 }
