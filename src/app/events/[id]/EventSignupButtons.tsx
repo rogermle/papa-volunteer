@@ -29,6 +29,7 @@ export function EventSignupButtons({ eventId, capacity, confirmedCount, mySignup
   const [showSignupForm, setShowSignupForm] = useState(false)
   const [leaving, setLeaving] = useState(false)
   const [leaveError, setLeaveError] = useState<string | null>(null)
+  const [confirming, setConfirming] = useState(false)
   const router = useRouter()
 
   async function handleLeave(formData: FormData) {
@@ -37,7 +38,7 @@ export function EventSignupButtons({ eventId, capacity, confirmedCount, mySignup
     const result = await leaveEvent(formData)
     setLeaving(false)
     if (result && 'error' in result) {
-      setLeaveError(result.error)
+      setLeaveError(result.error ?? 'Something went wrong.')
       return
     }
     router.push(`/events/${eventId}?left=1`)
@@ -114,16 +115,36 @@ export function EventSignupButtons({ eventId, capacity, confirmedCount, mySignup
           {leaveError && (
             <p className="text-sm text-red-600" role="alert">{leaveError}</p>
           )}
-          <form action={handleLeave} className="inline">
-            <input type="hidden" name="eventId" value={eventId} />
+          {confirming ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm text-foreground">Are you sure? This will remove your sign-up.</span>
+              <form action={handleLeave} className="inline">
+                <input type="hidden" name="eventId" value={eventId} />
+                <button
+                  type="submit"
+                  disabled={leaving}
+                  className="rounded bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                >
+                  {leaving ? 'Cancelling…' : 'Yes, cancel my sign-up'}
+                </button>
+              </form>
+              <button
+                type="button"
+                onClick={() => setConfirming(false)}
+                className="rounded border border-papa-border bg-white px-3 py-1.5 text-sm text-foreground hover:bg-papa-card"
+              >
+                Keep my sign-up
+              </button>
+            </div>
+          ) : (
             <button
-              type="submit"
-              disabled={leaving}
-              className="rounded border border-green-300 bg-white px-3 py-1.5 text-sm font-medium text-green-800 hover:bg-green-100 disabled:opacity-50"
+              type="button"
+              onClick={() => setConfirming(true)}
+              className="rounded border border-red-300 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-100"
             >
-              {leaving ? 'Cancelling…' : 'Cancel sign-up'}
+              Cancel sign-up
             </button>
-          </form>
+          )}
         </div>
       </div>
     )
