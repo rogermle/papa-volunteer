@@ -7,9 +7,9 @@ export default function HomePage() {
       <section className="relative -mx-4 h-[min(60vh,420px)] min-h-[320px] overflow-hidden md:-mx-6 lg:-mx-8">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="https://images.unsplash.com/photo-1540962351504-03099e0a754b?w=1200&q=80"
-          alt="Aviation"
-          className="absolute inset-0 h-full w-full object-cover"
+          src="/images/papa-team.png"
+          alt="PAPA Team at a job fair"
+          className="absolute h-full w-full object-bottom object-center" 
         />
         <div className="absolute inset-0 bg-papa-navy/50" />
         <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center text-white">
@@ -17,7 +17,8 @@ export default function HomePage() {
             PAPA Volunteer
           </h1>
           <p className="mt-2 max-w-md text-lg drop-shadow-md text-white/95">
-            Promoting Diversity, Equity &amp; Inclusion in Aviation. Sign up to volunteer at tabling events.
+            Promoting Diversity, Equity &amp; Inclusion in Aviation. Sign up to
+            volunteer at tabling events.
           </p>
           <Link
             href="/events"
@@ -29,13 +30,13 @@ export default function HomePage() {
       </section>
 
       <section className="mt-8 flex flex-col gap-4">
-        <h2 className="text-xl font-semibold text-foreground">
-          How it works
-        </h2>
+        <h2 className="text-xl font-semibold text-foreground">How it works</h2>
         <ol className="list-inside list-decimal space-y-2 text-papa-muted">
           <li>Browse events you can volunteer at.</li>
           <li>Click an event for details, then sign up to show interest.</li>
-          <li>Sign in with Discord when prompted and complete a short profile.</li>
+          <li>
+            Sign in with Discord when prompted and complete a short profile.
+          </li>
           <li>You’re on the list — we’ll coordinate from there.</li>
         </ol>
         <Link

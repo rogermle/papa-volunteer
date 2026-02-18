@@ -134,7 +134,7 @@ export function Header({ initialAdmin = false }: HeaderProps) {
                     role="menuitem"
                     onClick={() => setMenuOpen(false)}
                   >
-                    My schedule
+                    My Schedule
                   </Link>
                   <form action="/auth/signout" method="post" className="block">
                     <button
