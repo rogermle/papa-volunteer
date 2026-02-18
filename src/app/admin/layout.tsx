@@ -27,6 +27,9 @@ export default async function AdminLayout({
         <Link href="/admin/events/new" className="text-sm text-papa-muted hover:text-papa-navy">
           New event
         </Link>
+        <Link href="/admin/chat-log" className="text-sm text-papa-muted hover:text-papa-navy">
+          Chat log
+        </Link>
       </div>
       {children}
     </div>

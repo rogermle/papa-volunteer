@@ -79,6 +79,12 @@ export function Header({ initialAdmin = false }: HeaderProps) {
           >
             Events
           </Link>
+          <Link
+            href="/chat"
+            className="text-sm text-white/90 hover:text-white"
+          >
+            FAQ
+          </Link>
           {isAdmin && (
             <Link
               href="/admin/events"
