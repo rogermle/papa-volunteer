@@ -10,14 +10,18 @@ export default async function AdminChatLogPage() {
     .order("created_at", { ascending: false })
     .limit(PAGE_SIZE);
 
-  const formatDate = (d: string) =>
-    new Date(d + "Z").toLocaleString("en-US", {
+  const formatDate = (d: string | null) => {
+    if (d == null) return "—";
+    const date = new Date(d);
+    if (Number.isNaN(date.getTime())) return "—";
+    return date.toLocaleString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
       hour: "numeric",
       minute: "2-digit",
     });
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -33,7 +37,7 @@ export default async function AdminChatLogPage() {
         </a>
       </div>
       <p className="text-sm text-papa-muted">
-        Recent FAQ chat messages for analysis. Export CSV for full history.
+        Recent FAQ chat messages for analysis (newest first). Times are in your local timezone. Export CSV for full history.
       </p>
       {!rows?.length ? (
         <p className="text-papa-muted">No chat log entries yet.</p>
@@ -62,7 +66,10 @@ export default async function AdminChatLogPage() {
                     {r.session_id ?? "—"}
                   </td>
                   <td className="px-3 py-2">{r.role}</td>
-                  <td className="max-w-[20rem] truncate px-3 py-2 text-foreground">
+                  <td
+                    className="max-w-[20rem] truncate px-3 py-2 text-foreground"
+                    title={r.content}
+                  >
                     {r.content}
                   </td>
                 </tr>
