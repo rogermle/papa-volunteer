@@ -109,13 +109,15 @@ For this stack (Next.js + Supabase), **Vercel** is the simplest and most reliabl
 
 4. **Set environment variables** (before first deploy)
    - In the import screen, expand **Environment Variables**.
-   - Add:
+   - Add (use your real values from Supabase and Vercel):
 
    | Name | Value | Notes |
    |------|--------|--------|
-   | `NEXT_PUBLIC_SUPABASE_URL` | `https://<your-project-ref>.supabase.co` | From Supabase Dashboard → Settings → API |
+   | `NEXT_PUBLIC_SUPABASE_URL` | `https://<your-project-ref>.supabase.co` | Supabase Dashboard → Settings → API |
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | your anon (public) key | Same place |
-   | `NEXT_PUBLIC_SITE_URL` | `https://your-app.vercel.app` | **Use your real Vercel URL** (see step 6 if you use a custom domain later) |
+   | `SUPABASE_SERVICE_ROLE_KEY` | your service_role key | Same place; **keep secret** (server-only, for chat log + FAQ RAG) |
+   | `OPENAI_API_KEY` | your OpenAI API key | Required for FAQ chat; server-only |
+   | `NEXT_PUBLIC_SITE_URL` | `https://your-app.vercel.app` | Your Vercel URL (no trailing slash). Update after first deploy if needed (step 6). |
 
    - Apply to **Production** (and optionally Preview if you want branch previews to work with auth).
 
@@ -135,6 +137,7 @@ For this stack (Next.js + Supabase), **Vercel** is the simplest and most reliabl
 
 8. **Test**
    - Open the production URL, go to **Events**, then **Sign in with Discord**. You should be redirected back to the app after login.
+   - If you use **FAQ chat** (`/chat`): you’re using the same Supabase DB as local, so `faq_chunks` is already populated. If you ever point production at a new Supabase project, run migrations and then run the ingest script locally with that project’s env: `node scripts/ingest-faq.mjs` (with `OPENAI_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`).
 
 Future pushes to your main branch will trigger automatic production deploys. Preview branches get their own URLs; use them with a separate Supabase redirect URL if you want to test auth on previews.
 
@@ -164,3 +167,5 @@ Future pushes to your main branch will trigger automatic production deploys. Pre
 - `/admin/events/new` – create event
 - `/admin/events/[id]/edit` – edit event
 - `/admin/events/[id]/signups` – view signups for an event
+- `/chat` – FAQ chat (RAG from PDF)
+- `/admin/chat-log` – view/export chat log (admin only)

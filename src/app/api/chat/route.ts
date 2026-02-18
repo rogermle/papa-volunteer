@@ -34,13 +34,12 @@ export async function POST(request: Request) {
 
     const service = createServiceClient();
 
-    const { data: embedList, error: embedError } = await openai.embeddings.create({
+    const { data: embedList } = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: message,
     });
     const embedding = Array.isArray(embedList) ? embedList[0]?.embedding : embedList?.data?.[0]?.embedding;
-    if (embedError || !embedding) {
-      console.error("Embed error:", embedError);
+    if (!embedding) {
       return NextResponse.json({ error: "Failed to process question." }, { status: 500 });
     }
 
