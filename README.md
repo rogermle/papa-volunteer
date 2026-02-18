@@ -78,6 +78,66 @@ When sign-in fails, you’ll be sent to `/auth/error` with a short message. Use 
 
 Try signing in again; if it still fails, the message on `/auth/error` should point to the step above that’s wrong.
 
+## Deployment
+
+### Recommendation: **Vercel**
+
+For this stack (Next.js + Supabase), **Vercel** is the simplest and most reliable:
+
+- **Next.js** is built by the same team; zero config, automatic serverless/edge, preview deployments for every branch.
+- **Free tier** is enough for a volunteer app (hobby usage).
+- **Supabase + Vercel** is a common combo; env vars and serverless work out of the box.
+
+**Alternatives:** **Railway** and **Netlify** both run Next.js well. Railway is handy if you later add background workers or want a single dashboard for app + DB; Netlify is similar to Vercel. For "deploy and forget," Vercel is the best fit.
+
+---
+
+### Deploy to Vercel (step-by-step)
+
+1. **Push your code to GitHub** (if you haven't already).  
+   Vercel deploys from a Git repo.
+
+2. **Sign in at [vercel.com](https://vercel.com)** with GitHub.
+
+3. **Import the project**
+   - Click **Add New… → Project**.
+   - Select the `papa-volunteer` repo (or the repo you use).
+   - **Framework Preset:** Next.js (auto-detected).
+   - **Root Directory:** leave as `.` unless the app lives in a subfolder.
+   - **Build Command:** `npm run build` (default).
+   - **Output Directory:** leave default (Next.js handles it).
+
+4. **Set environment variables** (before first deploy)
+   - In the import screen, expand **Environment Variables**.
+   - Add:
+
+   | Name | Value | Notes |
+   |------|--------|--------|
+   | `NEXT_PUBLIC_SUPABASE_URL` | `https://<your-project-ref>.supabase.co` | From Supabase Dashboard → Settings → API |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | your anon (public) key | Same place |
+   | `NEXT_PUBLIC_SITE_URL` | `https://your-app.vercel.app` | **Use your real Vercel URL** (see step 6 if you use a custom domain later) |
+
+   - Apply to **Production** (and optionally Preview if you want branch previews to work with auth).
+
+5. **Deploy**
+   - Click **Deploy**. Vercel will run `npm run build` and then host the app.
+   - After the first deploy, note the URL (e.g. `https://papa-volunteer-xxx.vercel.app`).
+
+6. **Point production to that URL**
+   - If you used a **placeholder** for `NEXT_PUBLIC_SITE_URL`, go to **Project → Settings → Environment Variables**, set `NEXT_PUBLIC_SITE_URL` to your actual Vercel URL (no trailing slash), and **redeploy** (Deployments → … → Redeploy).
+   - Optional: add a **custom domain** under **Settings → Domains**; then set `NEXT_PUBLIC_SITE_URL` to that domain and redeploy.
+
+7. **Supabase: production URL**
+   - In Supabase **Authentication → URL Configuration**:
+     - **Site URL:** set to your production URL (e.g. `https://papa-volunteer-xxx.vercel.app`).
+     - **Redirect URLs:** add `https://your-production-url.vercel.app/auth/callback` (or your custom domain + `/auth/callback`).
+   - Save. Discord OAuth already points at Supabase, so no Discord change is needed unless you add a new Supabase redirect.
+
+8. **Test**
+   - Open the production URL, go to **Events**, then **Sign in with Discord**. You should be redirected back to the app after login.
+
+Future pushes to your main branch will trigger automatic production deploys. Preview branches get their own URLs; use them with a separate Supabase redirect URL if you want to test auth on previews.
+
 ## Scripts
 
 - `npm run dev` – development server
