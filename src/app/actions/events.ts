@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { Timezone, VolunteerScheduleRow } from '@/lib/types/database'
 
-const TIMEZONES: Timezone[] = ['America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles']
+const TIMEZONES: Timezone[] = ['America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles', 'Pacific/Honolulu']
 
 function parseFormEvent(formData: FormData) {
   const title = (formData.get('title') as string)?.trim()

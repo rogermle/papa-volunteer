@@ -1,4 +1,4 @@
-export type Timezone = 'America/New_York' | 'America/Chicago' | 'America/Denver' | 'America/Los_Angeles'
+export type Timezone = 'America/New_York' | 'America/Chicago' | 'America/Denver' | 'America/Los_Angeles' | 'Pacific/Honolulu'
 
 export interface Profile {
   id: string
@@ -65,6 +65,7 @@ export const TIMEZONE_LABELS: Record<Timezone, string> = {
   'America/Chicago': 'Central',
   'America/Denver': 'Mountain',
   'America/Los_Angeles': 'Pacific',
+  'Pacific/Honolulu': 'Hawaii-Aleutian',
 }
 
 /** Format a schedule row day (YYYY-MM-DD or "Thu") for display, including year. */
