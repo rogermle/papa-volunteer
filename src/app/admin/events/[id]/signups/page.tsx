@@ -4,10 +4,10 @@ import { createClient } from '@/lib/supabase/server'
 import { TIMEZONE_LABELS } from '@/lib/types/database'
 import type { Timezone } from '@/lib/types/database'
 
-function profileName(s: { profiles: unknown }): string | null {
-  const p = s.profiles
-  if (p && typeof p === 'object' && 'discord_username' in p) return (p as { discord_username: string | null }).discord_username
-  return null
+function profileDisplay(s: { profiles: unknown }): string {
+  const p = s.profiles as { display_name?: string | null; discord_username?: string | null } | null
+  if (!p) return '—'
+  return (p.display_name || p.discord_username || '—') as string
 }
 
 export default async function EventSignupsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -24,8 +24,8 @@ export default async function EventSignupsPage({ params }: { params: Promise<{ i
   const { data: signups } = await supabase
     .from('event_signups')
     .select(`
-      id, user_id, waitlist_position, created_at,
-      profiles:user_id ( discord_username )
+      id, user_id, waitlist_position, volunteer_status, phone, availability_notes, travel_notes, created_at,
+      profiles:user_id ( discord_username, display_name )
     `)
     .eq('event_id', id)
     .order('waitlist_position', { ascending: true, nullsFirst: true })
@@ -37,46 +37,70 @@ export default async function EventSignupsPage({ params }: { params: Promise<{ i
 
   return (
     <div className="flex flex-col gap-6">
-      <Link href="/admin/events" className="text-sm text-zinc-600 hover:underline dark:text-zinc-400">
+      <Link href="/admin/events" className="text-sm text-papa-muted hover:text-papa-navy hover:underline">
         ← Back to events
       </Link>
-      <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+      <h1 className="text-xl font-semibold text-foreground">
         Signups: {event.title}
       </h1>
-      <p className="text-sm text-zinc-500 dark:text-zinc-500">
+      <p className="text-sm text-papa-muted">
         {event.start_date} – {event.end_date} · {tz} · {confirmed.length} / {event.capacity} · {waitlist.length} waitlist
       </p>
-      <div className="rounded border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-        <table className="w-full text-left text-sm">
+      <div className="overflow-x-auto rounded-xl border border-papa-border bg-papa-card shadow-sm">
+        <table className="w-full min-w-[640px] text-left text-sm">
           <thead>
-            <tr className="border-b border-zinc-200 dark:border-zinc-800">
-              <th className="p-3 font-medium text-zinc-900 dark:text-zinc-100">#</th>
-              <th className="p-3 font-medium text-zinc-900 dark:text-zinc-100">Volunteer</th>
-              <th className="p-3 font-medium text-zinc-900 dark:text-zinc-100">Status</th>
-              <th className="p-3 font-medium text-zinc-900 dark:text-zinc-100">Signed up</th>
+            <tr className="border-b border-papa-border">
+              <th className="p-3 font-medium text-foreground">#</th>
+              <th className="p-3 font-medium text-foreground">Volunteer</th>
+              <th className="p-3 font-medium text-foreground">Vol. status</th>
+              <th className="p-3 font-medium text-foreground">Phone</th>
+              <th className="p-3 font-medium text-foreground">Availability</th>
+              <th className="p-3 font-medium text-foreground">Travel</th>
+              <th className="p-3 font-medium text-foreground">List</th>
+              <th className="p-3 font-medium text-foreground">Signed up</th>
             </tr>
           </thead>
           <tbody>
             {confirmed.map((s, i) => (
-              <tr key={s.id} className="border-b border-zinc-100 dark:border-zinc-800">
-                <td className="p-3 text-zinc-500">{i + 1}</td>
-                <td className="p-3">{profileName(s) ?? s.user_id}</td>
+              <tr key={s.id} className="border-b border-papa-border">
+                <td className="p-3 text-papa-muted">{i + 1}</td>
+                <td className="p-3">{profileDisplay(s)}</td>
+                <td className="p-3 text-papa-muted">{s.volunteer_status ?? '—'}</td>
+                <td className="p-3 text-papa-muted">{s.phone ?? '—'}</td>
+                <td className="max-w-[160px] p-3 text-papa-muted" title={s.availability_notes ?? ''}>
+                  {(s.availability_notes ?? '—').slice(0, 40)}
+                  {(s.availability_notes?.length ?? 0) > 40 ? '…' : ''}
+                </td>
+                <td className="max-w-[120px] p-3 text-papa-muted" title={s.travel_notes ?? ''}>
+                  {(s.travel_notes ?? '—').slice(0, 30)}
+                  {(s.travel_notes?.length ?? 0) > 30 ? '…' : ''}
+                </td>
                 <td className="p-3">Confirmed</td>
-                <td className="p-3 text-zinc-500">{new Date(s.created_at).toLocaleString()}</td>
+                <td className="p-3 text-papa-muted">{new Date(s.created_at).toLocaleString()}</td>
               </tr>
             ))}
             {waitlist.map((s) => (
-              <tr key={s.id} className="border-b border-zinc-100 dark:border-zinc-800">
-                <td className="p-3 text-zinc-500">—</td>
-                <td className="p-3">{profileName(s) ?? s.user_id}</td>
-                <td className="p-3 text-amber-600 dark:text-amber-400">Waitlist #{s.waitlist_position}</td>
-                <td className="p-3 text-zinc-500">{new Date(s.created_at).toLocaleString()}</td>
+              <tr key={s.id} className="border-b border-papa-border">
+                <td className="p-3 text-papa-muted">—</td>
+                <td className="p-3">{profileDisplay(s)}</td>
+                <td className="p-3 text-papa-muted">{s.volunteer_status ?? '—'}</td>
+                <td className="p-3 text-papa-muted">{s.phone ?? '—'}</td>
+                <td className="max-w-[160px] p-3 text-papa-muted" title={s.availability_notes ?? ''}>
+                  {(s.availability_notes ?? '—').slice(0, 40)}
+                  {(s.availability_notes?.length ?? 0) > 40 ? '…' : ''}
+                </td>
+                <td className="max-w-[120px] p-3 text-papa-muted" title={s.travel_notes ?? ''}>
+                  {(s.travel_notes ?? '—').slice(0, 30)}
+                  {(s.travel_notes?.length ?? 0) > 30 ? '…' : ''}
+                </td>
+                <td className="p-3 text-amber-600">Waitlist #{s.waitlist_position}</td>
+                <td className="p-3 text-papa-muted">{new Date(s.created_at).toLocaleString()}</td>
               </tr>
             ))}
           </tbody>
         </table>
         {!signups?.length && (
-          <p className="p-4 text-zinc-500 dark:text-zinc-500">No signups yet.</p>
+          <p className="p-4 text-papa-muted">No signups yet.</p>
         )}
       </div>
     </div>

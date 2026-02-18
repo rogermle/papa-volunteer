@@ -13,6 +13,6 @@ export async function POST(request: Request) {
     },
   })
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
-  if (data.url) return NextResponse.redirect(data.url)
-  return NextResponse.redirect(next)
+  if (data.url) return NextResponse.redirect(data.url, 302)
+  return NextResponse.redirect(new URL(next, baseUrl), 302)
 }

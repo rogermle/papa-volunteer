@@ -16,17 +16,17 @@ export function EventForm({ event }: Props) {
     <form action={formAction} className="flex max-w-xl flex-col gap-4">
       {event && <input type="hidden" name="eventId" value={event.id} />}
       {state && 'error' in state && (
-        <p className="rounded bg-red-50 p-2 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
+        <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {state.error}
         </p>
       )}
       {state && 'ok' in state && state.ok && (
-        <p className="rounded bg-green-50 p-2 text-sm text-green-700 dark:bg-green-900/20 dark:text-green-300">
+        <p className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm font-medium text-green-800" role="status">
           {isEdit ? 'Event updated.' : 'Event created.'}
         </p>
       )}
       <div>
-        <label htmlFor="title" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="title" className="mb-1 block text-sm font-medium text-foreground">
           Title
         </label>
         <input
@@ -35,12 +35,12 @@ export function EventForm({ event }: Props) {
           type="text"
           required
           defaultValue={event?.title}
-          className="w-full rounded border border-zinc-300 px-3 py-2 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+          className="w-full rounded border border-papa-border bg-background px-3 py-2 text-foreground"
         />
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="start_date" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label htmlFor="start_date" className="mb-1 block text-sm font-medium text-foreground">
             Start date
           </label>
           <input
@@ -49,11 +49,11 @@ export function EventForm({ event }: Props) {
             type="date"
             required
             defaultValue={event?.start_date}
-            className="w-full rounded border border-zinc-300 px-3 py-2 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+            className="w-full rounded border border-papa-border bg-background px-3 py-2 text-foreground"
           />
         </div>
         <div>
-          <label htmlFor="end_date" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label htmlFor="end_date" className="mb-1 block text-sm font-medium text-foreground">
             End date
           </label>
           <input
@@ -62,13 +62,13 @@ export function EventForm({ event }: Props) {
             type="date"
             required
             defaultValue={event?.end_date}
-            className="w-full rounded border border-zinc-300 px-3 py-2 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+            className="w-full rounded border border-papa-border bg-background px-3 py-2 text-foreground"
           />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="start_time" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label htmlFor="start_time" className="mb-1 block text-sm font-medium text-foreground">
             Start time (optional)
           </label>
           <input
@@ -76,11 +76,11 @@ export function EventForm({ event }: Props) {
             name="start_time"
             type="time"
             defaultValue={event?.start_time ?? ''}
-            className="w-full rounded border border-zinc-300 px-3 py-2 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+            className="w-full rounded border border-papa-border bg-background px-3 py-2 text-foreground"
           />
         </div>
         <div>
-          <label htmlFor="end_time" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label htmlFor="end_time" className="mb-1 block text-sm font-medium text-foreground">
             End time (optional)
           </label>
           <input
@@ -88,12 +88,12 @@ export function EventForm({ event }: Props) {
             name="end_time"
             type="time"
             defaultValue={event?.end_time ?? ''}
-            className="w-full rounded border border-zinc-300 px-3 py-2 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+            className="w-full rounded border border-papa-border bg-background px-3 py-2 text-foreground"
           />
         </div>
       </div>
       <div>
-        <label htmlFor="timezone" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="timezone" className="mb-1 block text-sm font-medium text-foreground">
           Time zone
         </label>
         <select
@@ -101,7 +101,7 @@ export function EventForm({ event }: Props) {
           name="timezone"
           required
           defaultValue={event?.timezone ?? 'America/New_York'}
-          className="w-full rounded border border-zinc-300 px-3 py-2 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+          className="w-full rounded border border-papa-border bg-background px-3 py-2 text-foreground"
         >
           {Object.entries(TIMEZONE_LABELS).map(([value, label]) => (
             <option key={value} value={value}>{label}</option>
@@ -109,7 +109,7 @@ export function EventForm({ event }: Props) {
         </select>
       </div>
       <div>
-        <label htmlFor="location" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="location" className="mb-1 block text-sm font-medium text-foreground">
           Location
         </label>
         <input
@@ -118,11 +118,11 @@ export function EventForm({ event }: Props) {
           type="text"
           placeholder="e.g. TBD or venue name"
           defaultValue={event?.location ?? ''}
-          className="w-full rounded border border-zinc-300 px-3 py-2 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+          className="w-full rounded border border-papa-border bg-background px-3 py-2 text-foreground"
         />
       </div>
       <div>
-        <label htmlFor="description" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="description" className="mb-1 block text-sm font-medium text-foreground">
           Description
         </label>
         <textarea
@@ -130,11 +130,11 @@ export function EventForm({ event }: Props) {
           name="description"
           rows={4}
           defaultValue={event?.description ?? ''}
-          className="w-full rounded border border-zinc-300 px-3 py-2 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+          className="w-full rounded border border-papa-border bg-background px-3 py-2 text-foreground"
         />
       </div>
       <div>
-        <label htmlFor="external_link" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="external_link" className="mb-1 block text-sm font-medium text-foreground">
           External link (e.g. event page / register)
         </label>
         <input
@@ -143,11 +143,24 @@ export function EventForm({ event }: Props) {
           type="url"
           placeholder="https://..."
           defaultValue={event?.external_link ?? ''}
-          className="w-full rounded border border-zinc-300 px-3 py-2 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+          className="w-full rounded border border-papa-border bg-background px-3 py-2 text-foreground"
         />
       </div>
       <div>
-        <label htmlFor="capacity" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="image_url" className="mb-1 block text-sm font-medium text-foreground">
+          Event photo URL
+        </label>
+        <input
+          id="image_url"
+          name="image_url"
+          type="url"
+          placeholder="https://... (optional; shows on list and detail)"
+          defaultValue={event?.image_url ?? ''}
+          className="w-full rounded border border-papa-border bg-background px-3 py-2 text-foreground"
+        />
+      </div>
+      <div>
+        <label htmlFor="capacity" className="mb-1 block text-sm font-medium text-foreground">
           Volunteer capacity
         </label>
         <input
@@ -157,20 +170,20 @@ export function EventForm({ event }: Props) {
           min={1}
           required
           defaultValue={event?.capacity ?? 5}
-          className="w-full rounded border border-zinc-300 px-3 py-2 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+          className="w-full rounded border border-papa-border bg-background px-3 py-2 text-foreground"
         />
       </div>
       <div className="flex gap-2">
         <button
           type="submit"
-          className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+          className="rounded bg-papa-navy px-4 py-2 text-sm font-medium text-white hover:bg-papa-navy-dark"
         >
           {isEdit ? 'Update event' : 'Create event'}
         </button>
         {isEdit && (
           <Link
             href="/admin/events"
-            className="rounded border border-zinc-300 px-4 py-2 text-sm font-medium dark:border-zinc-600 dark:text-zinc-300"
+            className="rounded border border-papa-border px-4 py-2 text-sm font-medium text-foreground hover:bg-papa-card"
           >
             Cancel
           </Link>

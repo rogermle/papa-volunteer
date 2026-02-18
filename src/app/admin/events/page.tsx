@@ -33,23 +33,23 @@ export default async function AdminEventsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+      <h1 className="text-2xl font-semibold text-foreground">
         Admin – Events
       </h1>
       {!events?.length ? (
-        <p className="text-zinc-600 dark:text-zinc-400">No events. Create one to get started.</p>
+        <p className="text-papa-muted">No events. Create one to get started.</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {(events ?? []).map((event) => {
             const counts = countByEvent[event.id] ?? { confirmed: 0, waitlist: 0 }
             const tz = TIMEZONE_LABELS[event.timezone as Timezone] ?? event.timezone
             return (
-              <li key={event.id} className="flex items-center justify-between rounded border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+              <li key={event.id} className="flex items-center justify-between rounded-xl border border-papa-border bg-papa-card px-4 py-3 shadow-sm">
                 <div>
-                  <Link href={`/events/${event.id}`} className="font-medium text-zinc-900 hover:underline dark:text-zinc-100">
+                  <Link href={`/events/${event.id}`} className="font-medium text-foreground hover:text-papa-navy hover:underline">
                     {event.title}
                   </Link>
-                  <div className="text-sm text-zinc-500 dark:text-zinc-500">
+                  <div className="text-sm text-papa-muted">
                     {formatDate(event.start_date)}
                     {event.start_date !== event.end_date && ` – ${formatDate(event.end_date)}`} · {tz} · {counts.confirmed}/{event.capacity}
                     {counts.waitlist > 0 && ` · ${counts.waitlist} waitlist`}
@@ -58,13 +58,13 @@ export default async function AdminEventsPage() {
                 <div className="flex gap-2">
                   <Link
                     href={`/admin/events/${event.id}/signups`}
-                    className="text-sm text-zinc-600 hover:underline dark:text-zinc-400"
+                    className="text-sm text-papa-muted hover:text-papa-navy hover:underline"
                   >
                     Signups
                   </Link>
                   <Link
                     href={`/admin/events/${event.id}/edit`}
-                    className="text-sm text-zinc-600 hover:underline dark:text-zinc-400"
+                    className="text-sm text-papa-muted hover:text-papa-navy hover:underline"
                   >
                     Edit
                   </Link>

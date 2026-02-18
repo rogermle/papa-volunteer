@@ -1,43 +1,137 @@
 'use client'
 
-import { signUpForEvent, leaveEvent } from '@/app/actions/signup'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { leaveEvent } from '@/app/actions/signup'
+import { VolunteerSignupForm } from './VolunteerSignupForm'
+
+type MySignup = {
+  waitlist_position: number | null
+  volunteer_status: string | null
+  phone: string | null
+  availability_notes: string | null
+  travel_notes: string | null
+}
 
 type Props = {
   eventId: string
   capacity: number
   confirmedCount: number
-  mySignup: { waitlist_position: number | null } | null
+  mySignup: MySignup | null
+  isLoggedIn: boolean
 }
 
-const noReturn = (fn: (fd: FormData) => Promise<unknown>) =>
-  (fd: FormData) => fn(fd).then(() => {})
-
-export function EventSignupButtons({ eventId, capacity, confirmedCount, mySignup }: Props) {
+export function EventSignupButtons({ eventId, capacity, confirmedCount, mySignup, isLoggedIn }: Props) {
   const full = confirmedCount >= capacity
+  const [showSignupForm, setShowSignupForm] = useState(false)
+  const [leaving, setLeaving] = useState(false)
+  const [leaveError, setLeaveError] = useState<string | null>(null)
+  const router = useRouter()
+
+  async function handleLeave(formData: FormData) {
+    setLeaveError(null)
+    setLeaving(true)
+    const result = await leaveEvent(formData)
+    setLeaving(false)
+    if (result && 'error' in result) {
+      setLeaveError(result.error)
+      return
+    }
+    router.push(`/events/${eventId}?left=1`)
+    router.refresh()
+  }
+
+  if (!isLoggedIn) {
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="text-sm text-papa-muted">
+          Sign in to sign up and show your interest.
+        </p>
+        <Link
+          href={`/auth/signin?next=${encodeURIComponent(`/events/${eventId}`)}`}
+          className="inline-flex rounded bg-papa-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-papa-accent-hover"
+        >
+          Sign in with Discord
+        </Link>
+      </div>
+    )
+  }
 
   if (mySignup) {
+    const onWaitlist = mySignup.waitlist_position != null
+    const hasDetails = mySignup.volunteer_status || mySignup.phone || mySignup.availability_notes || mySignup.travel_notes
     return (
-      <form action={noReturn(leaveEvent)} className="inline">
-        <input type="hidden" name="eventId" value={eventId} />
-        <button
-          type="submit"
-          className="rounded border border-red-200 bg-red-50 px-3 py-1.5 text-sm text-red-700 hover:bg-red-100 dark:border-red-900 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/30"
-        >
-          {mySignup.waitlist_position != null ? 'Leave waitlist' : 'Leave event'}
-        </button>
-      </form>
+      <div className="mt-2 w-full rounded-xl border border-green-200 bg-green-50/80 p-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded bg-green-200/80 px-2 py-0.5 text-sm font-medium text-green-900">
+            {onWaitlist ? `You're on the waitlist (#${mySignup.waitlist_position})` : "You're signed up"}
+          </span>
+        </div>
+        {hasDetails && (
+          <dl className="mt-3 grid gap-1.5 text-sm text-green-900/90">
+            {mySignup.volunteer_status && (
+              <>
+                <dt className="font-medium text-green-800">Status</dt>
+                <dd>{mySignup.volunteer_status}</dd>
+              </>
+            )}
+            {mySignup.phone && (
+              <>
+                <dt className="font-medium text-green-800">Phone</dt>
+                <dd>{mySignup.phone}</dd>
+              </>
+            )}
+            {mySignup.availability_notes && (
+              <>
+                <dt className="font-medium text-green-800">Availability</dt>
+                <dd className="whitespace-pre-wrap">{mySignup.availability_notes}</dd>
+              </>
+            )}
+            {mySignup.travel_notes && (
+              <>
+                <dt className="font-medium text-green-800">Travel / accommodations</dt>
+                <dd className="whitespace-pre-wrap">{mySignup.travel_notes}</dd>
+              </>
+            )}
+          </dl>
+        )}
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {leaveError && (
+            <p className="text-sm text-red-600" role="alert">{leaveError}</p>
+          )}
+          <form action={handleLeave} className="inline">
+            <input type="hidden" name="eventId" value={eventId} />
+            <button
+              type="submit"
+              disabled={leaving}
+              className="rounded border border-green-300 bg-white px-3 py-1.5 text-sm font-medium text-green-800 hover:bg-green-100 disabled:opacity-50"
+            >
+              {leaving ? 'Cancelling…' : 'Cancel sign-up'}
+            </button>
+          </form>
+        </div>
+      </div>
+    )
+  }
+
+  if (showSignupForm) {
+    return (
+      <VolunteerSignupForm
+        eventId={eventId}
+        full={full}
+        onCancel={() => setShowSignupForm(false)}
+      />
     )
   }
 
   return (
-    <form action={noReturn(signUpForEvent)} className="inline">
-      <input type="hidden" name="eventId" value={eventId} />
-      <button
-        type="submit"
-        className="rounded bg-[#5865F2] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#4752c4]"
-      >
-        {full ? 'Join waitlist' : 'Sign up to volunteer'}
-      </button>
-    </form>
+    <button
+      type="button"
+      onClick={() => setShowSignupForm(true)}
+      className="rounded bg-papa-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-papa-accent-hover"
+    >
+      {full ? 'Join waitlist' : 'Sign up to volunteer'}
+    </button>
   )
 }

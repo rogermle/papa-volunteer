@@ -1,0 +1,148 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { signUpForEvent } from '@/app/actions/signup'
+import { PhoneInput } from '@/components/PhoneInput'
+
+type Props = {
+  eventId: string
+  full: boolean
+  onCancel?: () => void
+}
+
+const STATUS_OPTIONS = [
+  '',
+  'Student',
+  'CFI / CFII',
+  'Job searching',
+  'CFI student',
+  'CSEL student',
+  'Industry professional',
+  'Other',
+]
+
+export function VolunteerSignupForm({ eventId, full, onCancel }: Props) {
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<'signed_up' | 'waitlist' | null>(null)
+  const router = useRouter()
+
+  async function handleSubmit(formData: FormData) {
+    setError(null)
+    setSubmitting(true)
+    const result = await signUpForEvent(formData)
+    setSubmitting(false)
+    if (result && 'error' in result) {
+      setError(result.error)
+      return
+    }
+    setSuccess(result?.waitlist ? 'waitlist' : 'signed_up')
+    setTimeout(() => router.refresh(), 1500)
+  }
+
+  if (success) {
+    return (
+      <div className="mt-4 rounded-xl border border-green-200 bg-green-50 p-4" role="status">
+        <p className="font-medium text-green-800">
+          {success === 'waitlist' ? "You're on the waitlist!" : "You're signed up!"}
+        </p>
+        <p className="mt-1 text-sm text-green-700">
+          Refreshing the page…
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <form
+      action={handleSubmit}
+      className="mt-4 rounded-xl border border-papa-border bg-papa-card p-4"
+    >
+      <input type="hidden" name="eventId" value={eventId} />
+      {error && (
+        <p className="mb-3 rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-800" role="alert">
+          {error}
+        </p>
+      )}
+      <h3 className="mb-3 text-sm font-semibold text-foreground">
+        Volunteer details
+      </h3>
+      <p className="mb-4 text-xs text-papa-muted">
+        Same info you’d use in the Excel sign-up: status, phone, when you can help, and travel if needed.
+      </p>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="volunteer_status" className="mb-1 block text-xs font-medium text-foreground">
+            Volunteer status
+          </label>
+          <select
+            id="volunteer_status"
+            name="volunteer_status"
+            className="w-full rounded border border-papa-border bg-background px-3 py-2 text-sm text-foreground"
+          >
+            {STATUS_OPTIONS.map((opt) => (
+              <option key={opt || 'blank'} value={opt}>
+                {opt || '— Select —'}
+              </option>
+            ))}
+          </select>
+          <p className="mt-0.5 text-xs text-papa-muted">e.g. student, CFI, job searching</p>
+        </div>
+        <div>
+          <label htmlFor="phone" className="mb-1 block text-xs font-medium text-foreground">
+            Phone <span className="text-papa-muted">(optional)</span>
+          </label>
+          <PhoneInput
+            id="phone"
+            name="phone"
+            placeholder="(555) 123-4567"
+            className="w-full rounded border border-papa-border bg-background px-3 py-2 text-sm text-foreground"
+          />
+        </div>
+      </div>
+      <div className="mt-4">
+        <label htmlFor="availability_notes" className="mb-1 block text-xs font-medium text-foreground">
+          Availability <span className="text-papa-muted">(optional)</span>
+        </label>
+        <textarea
+          id="availability_notes"
+          name="availability_notes"
+          rows={2}
+          placeholder="e.g. Times flexible, 9–11 AM only, or when you can staff the table if you’re also attending as a participant"
+          className="w-full rounded border border-papa-border bg-background px-3 py-2 text-sm text-foreground"
+        />
+      </div>
+      <div className="mt-4">
+        <label htmlFor="travel_notes" className="mb-1 block text-xs font-medium text-foreground">
+          Travel / accommodations <span className="text-papa-muted">(optional)</span>
+        </label>
+        <textarea
+          id="travel_notes"
+          name="travel_notes"
+          rows={2}
+          placeholder="e.g. Arrival/departure, hotel or Airbnb, or if local and can pick up volunteers"
+          className="w-full rounded border border-papa-border bg-background px-3 py-2 text-sm text-foreground"
+        />
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button
+          type="submit"
+          disabled={submitting}
+          className="rounded bg-papa-accent px-4 py-2 text-sm font-medium text-white hover:bg-papa-accent-hover disabled:opacity-50"
+        >
+          {submitting ? 'Submitting…' : full ? 'Join waitlist' : 'Sign up to volunteer'}
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded border border-papa-border px-4 py-2 text-sm text-papa-muted hover:bg-papa-card hover:text-foreground"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
+    </form>
+  )
+}

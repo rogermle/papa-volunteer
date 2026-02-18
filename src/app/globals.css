@@ -1,26 +1,47 @@
 @import "tailwindcss";
 
+/* PAPA / asianpilots.org–aligned theme: navy, white, professional */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1e293b;
+  --papa-navy: #1e3a5f;
+  --papa-navy-dark: #0f2744;
+  --papa-accent: #b91c1c;
+  --papa-accent-hover: #991b1b;
+  --papa-muted: #64748b;
+  --papa-border: #e2e8f0;
+  --papa-card: #f8fafc;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-papa-navy: var(--papa-navy);
+  --color-papa-navy-dark: var(--papa-navy-dark);
+  --color-papa-accent: var(--papa-accent);
+  --color-papa-accent-hover: var(--papa-accent-hover);
+  --color-papa-muted: var(--papa-muted);
+  --color-papa-border: var(--papa-border);
+  --color-papa-card: var(--papa-card);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+}
+
+/* Override dark mode: keep PAPA light theme as default to match main site */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f172a;
+    --foreground: #f1f5f9;
+    --papa-navy: #1e40af;
+    --papa-navy-dark: #1e3a8a;
+    --papa-muted: #94a3b8;
+    --papa-border: #334155;
+    --papa-card: #1e293b;
+  }
 }

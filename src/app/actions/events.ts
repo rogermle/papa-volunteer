@@ -16,6 +16,7 @@ function parseFormEvent(formData: FormData) {
   const location = (formData.get('location') as string)?.trim() || null
   const description = (formData.get('description') as string)?.trim() || null
   const external_link = (formData.get('external_link') as string)?.trim() || null
+  const image_url = (formData.get('image_url') as string)?.trim() || null
   const capacity = parseInt(String(formData.get('capacity')), 10)
   if (!title || !start_date || !end_date || !timezone || TIMEZONES.includes(timezone) === false || capacity < 1) {
     return { error: 'Missing or invalid fields.' }
@@ -30,6 +31,7 @@ function parseFormEvent(formData: FormData) {
     location,
     description,
     external_link,
+    image_url,
     capacity,
   }
 }
@@ -46,6 +48,7 @@ export async function createEvent(_prevState: unknown, formData: FormData) {
   const { error } = await supabase.from('events').insert(parsed)
   if (error) return { error: error.message }
   revalidatePath('/admin/events')
+  revalidatePath('/events')
   revalidatePath('/calendar')
   return { ok: true }
 }
@@ -64,6 +67,7 @@ export async function updateEvent(_prevState: unknown, formData: FormData) {
   const { error } = await supabase.from('events').update(parsed).eq('id', eventId)
   if (error) return { error: error.message }
   revalidatePath('/admin/events')
+  revalidatePath('/events')
   revalidatePath('/calendar')
   revalidatePath(`/events/${eventId}`)
   return { ok: true }

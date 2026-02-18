@@ -41,13 +41,23 @@ export async function signUpForEvent(formData: FormData) {
     waitlistPosition = (lastWaitlist?.waitlist_position ?? 0) + 1
   }
 
+  const volunteerStatus = (formData.get('volunteer_status') as string)?.trim() || null
+  const phone = (formData.get('phone') as string)?.trim() || null
+  const availabilityNotes = (formData.get('availability_notes') as string)?.trim() || null
+  const travelNotes = (formData.get('travel_notes') as string)?.trim() || null
+
   const { error } = await supabase.from('event_signups').insert({
     event_id: eventId,
     user_id: user.id,
     waitlist_position: waitlistPosition,
+    volunteer_status: volunteerStatus,
+    phone,
+    availability_notes: availabilityNotes,
+    travel_notes: travelNotes,
   })
   if (error) return { error: error.message }
   revalidatePath(`/events/${eventId}`)
+  revalidatePath('/my-signups')
   revalidatePath('/calendar')
   return { ok: true, waitlist: atCapacity }
 }
@@ -67,6 +77,7 @@ export async function leaveEvent(formData: FormData) {
   if (error) return { error: error.message }
 
   revalidatePath(`/events/${eventId}`)
+  revalidatePath('/my-signups')
   revalidatePath('/calendar')
   return { ok: true }
 }

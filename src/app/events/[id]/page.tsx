@@ -1,8 +1,10 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
-import { TIMEZONE_LABELS } from '@/lib/types/database'
+import { TIMEZONE_LABELS, formatTimeLocal } from '@/lib/types/database'
 import type { Timezone } from '@/lib/types/database'
+import { EventActionBanner } from './EventActionBanner'
 import { EventSignupButtons } from './EventSignupButtons'
 
 function profileName(profiles: unknown): string | null {
@@ -20,7 +22,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
   const { data: signups } = await supabase
     .from('event_signups')
     .select(`
-      id, user_id, waitlist_position, created_at,
+      id, user_id, waitlist_position, volunteer_status, phone, availability_notes, travel_notes, created_at,
       profiles:user_id ( discord_username )
     `)
     .eq('event_id', id)
@@ -35,37 +37,55 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
   const tz = TIMEZONE_LABELS[event.timezone as Timezone] ?? event.timezone
 
   const formatDate = (d: string) => new Date(d + 'Z').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
-  const formatTime = (t: string | null) =>
-    t ? new Date(`1970-01-01T${t}Z`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : null
-  const timeStr = [formatTime(event.start_time), formatTime(event.end_time)].filter(Boolean).join(' – ') || null
+  const timeStr = [formatTimeLocal(event.start_time), formatTimeLocal(event.end_time)].filter(Boolean).join(' – ') || null
 
   return (
     <div className="flex flex-col gap-6">
-      <Link href="/calendar" className="text-sm text-zinc-600 hover:underline dark:text-zinc-400">
-        ← Back to calendar
+      <Link href="/events" className="text-sm text-papa-muted hover:text-papa-navy hover:underline">
+        ← Back to events
       </Link>
-      <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-        <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">{event.title}</h1>
-        <div className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+      <Suspense fallback={null}>
+        <EventActionBanner />
+      </Suspense>
+      <div className="overflow-hidden rounded-xl border border-papa-border bg-papa-card shadow-sm">
+        {event.image_url ? (
+          <div className="aspect-[21/9] w-full shrink-0 overflow-hidden bg-papa-muted/20">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={event.image_url}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          </div>
+        ) : (
+          <div className="flex aspect-[21/9] w-full items-center justify-center bg-papa-muted/20 text-papa-muted/60">
+            <svg className="h-16 w-16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+        )}
+        <div className="p-6">
+        <h1 className="text-xl font-semibold text-foreground">{event.title}</h1>
+        <div className="mt-2 text-sm text-papa-muted">
           {formatDate(event.start_date)}
           {event.start_date !== event.end_date && ` – ${formatDate(event.end_date)}`}
           {timeStr && ` · ${timeStr} ${tz}`}
         </div>
         {event.location && (
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Location: {event.location}</p>
+          <p className="mt-1 text-sm text-papa-muted">Location: {event.location}</p>
         )}
         {event.external_link && (
           <a
             href={event.external_link}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-2 inline-block text-sm text-[#5865F2] hover:underline"
+            className="mt-2 inline-block text-sm text-papa-accent hover:underline"
           >
             Event details / Register →
           </a>
         )}
         {event.description && (
-          <div className="mt-4 whitespace-pre-wrap text-sm text-zinc-700 dark:text-zinc-300">
+          <div className="mt-4 whitespace-pre-wrap text-sm text-foreground">
             {event.description}
           </div>
         )}
@@ -74,38 +94,46 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
             eventId={event.id}
             capacity={event.capacity}
             confirmedCount={confirmed.length}
-            mySignup={mySignup ? { waitlist_position: mySignup.waitlist_position } : null}
+            mySignup={mySignup ? {
+              waitlist_position: mySignup.waitlist_position,
+              volunteer_status: mySignup.volunteer_status ?? null,
+              phone: mySignup.phone ?? null,
+              availability_notes: mySignup.availability_notes ?? null,
+              travel_notes: mySignup.travel_notes ?? null,
+            } : null}
+            isLoggedIn={!!user}
           />
         </div>
+        </div>
       </div>
-      <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-        <h2 className="font-medium text-zinc-900 dark:text-zinc-100">
+      <div className="rounded-xl border border-papa-border bg-papa-card p-6 shadow-sm">
+        <h2 className="font-medium text-foreground">
           Volunteers ({confirmed.length} / {event.capacity})
           {waitlist.length > 0 && ` · ${waitlist.length} on waitlist`}
         </h2>
         <ul className="mt-2 space-y-1 text-sm">
           {confirmed.map((s, i) => (
             <li key={s.id} className="flex items-center gap-2">
-              <span className="text-zinc-500 dark:text-zinc-500">{i + 1}.</span>
+              <span className="text-papa-muted">{i + 1}.</span>
               {profileName(s.profiles) ?? 'Volunteer'}
               {s.user_id === user?.id && (
-                <span className="rounded bg-zinc-200 px-1.5 py-0.5 text-xs dark:bg-zinc-700">You</span>
+                <span className="rounded bg-papa-navy/10 px-1.5 py-0.5 text-xs text-papa-navy">You</span>
               )}
             </li>
           ))}
-          {waitlist.map((s, i) => (
-            <li key={s.id} className="flex items-center gap-2 text-zinc-500 dark:text-zinc-500">
+          {waitlist.map((s) => (
+            <li key={s.id} className="flex items-center gap-2 text-papa-muted">
               <span>Waitlist #{s.waitlist_position}</span>
               {profileName(s.profiles) ?? 'Volunteer'}
               {s.user_id === user?.id && (
-                <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
+                <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">
                   You
                 </span>
               )}
             </li>
           ))}
           {signups?.length === 0 && (
-            <li className="text-zinc-500 dark:text-zinc-500">No signups yet.</li>
+            <li className="text-papa-muted">No signups yet.</li>
           )}
         </ul>
       </div>
