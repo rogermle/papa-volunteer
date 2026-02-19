@@ -8,6 +8,7 @@ import { VolunteerSignupForm } from './VolunteerSignupForm'
 
 type MySignup = {
   waitlist_position: number | null
+  role: string | null
   volunteer_status: string | null
   phone: string | null
   is_local: boolean | null
@@ -63,16 +64,27 @@ export function EventSignupButtons({ eventId, capacity, confirmedCount, mySignup
 
   if (mySignup) {
     const onWaitlist = mySignup.waitlist_position != null
-    const hasDetails = mySignup.volunteer_status || mySignup.phone != null || mySignup.is_local != null || mySignup.flight_voucher_requested != null || mySignup.availability_notes || mySignup.travel_notes
+    const hasDetails = mySignup.role || mySignup.volunteer_status || mySignup.phone != null || mySignup.is_local != null || mySignup.flight_voucher_requested != null || mySignup.availability_notes || mySignup.travel_notes
     return (
       <div className="mt-2 w-full rounded-xl border border-green-200 bg-green-50/80 p-4">
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded bg-green-200/80 px-2 py-0.5 text-sm font-medium text-green-900">
             {onWaitlist ? `You're on the waitlist (#${mySignup.waitlist_position})` : "You're signed up"}
           </span>
+          {mySignup.role && (
+            <span className="rounded bg-green-200/60 px-2 py-0.5 text-sm text-green-900">
+              {mySignup.role}
+            </span>
+          )}
         </div>
         {hasDetails && (
           <dl className="mt-3 grid gap-1.5 text-sm text-green-900/90">
+            {mySignup.role && (
+              <>
+                <dt className="font-medium text-green-800">Role</dt>
+                <dd>{mySignup.role}</dd>
+              </>
+            )}
             {mySignup.volunteer_status && (
               <>
                 <dt className="font-medium text-green-800">Status</dt>

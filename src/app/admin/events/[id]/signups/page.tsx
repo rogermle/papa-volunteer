@@ -33,7 +33,7 @@ export default async function EventSignupsPage({ params }: { params: Promise<{ i
 
   const { data: signups } = await supabase
     .from('event_signups')
-    .select('id, user_id, waitlist_position, volunteer_status, phone, is_local, flight_voucher_requested, availability_notes, travel_notes, created_at')
+    .select('id, user_id, waitlist_position, role, volunteer_status, phone, is_local, flight_voucher_requested, availability_notes, travel_notes, created_at')
     .eq('event_id', id)
     .order('waitlist_position', { ascending: true, nullsFirst: true })
     .order('created_at', { ascending: true })
@@ -79,6 +79,7 @@ export default async function EventSignupsPage({ params }: { params: Promise<{ i
               <th className="p-3 font-medium text-foreground">#</th>
               <th className="p-3 font-medium text-foreground">Volunteer</th>
               <th className="p-3 font-medium text-foreground">Discord</th>
+              <th className="p-3 font-medium text-foreground">Role</th>
               <th className="p-3 font-medium text-foreground">Vol. status</th>
               <th className="p-3 font-medium text-foreground">Phone</th>
               <th className="p-3 font-medium text-foreground">Local</th>
@@ -95,6 +96,7 @@ export default async function EventSignupsPage({ params }: { params: Promise<{ i
                 <td className="p-3 text-papa-muted">{i + 1}</td>
                 <td className="p-3">{profileDisplay(s)}</td>
                 <td className="p-3 font-mono text-sm text-papa-muted" title="Discord handle for contact">{discordHandle(s)}</td>
+                <td className="p-3 text-papa-muted">{s.role ?? '—'}</td>
                 <td className="p-3 text-papa-muted">{s.volunteer_status ?? '—'}</td>
                 <td className="p-3 text-papa-muted">{s.phone ?? '—'}</td>
                 <td className="p-3 text-papa-muted">{s.is_local === true ? 'Yes' : s.is_local === false ? 'No' : '—'}</td>
@@ -116,6 +118,7 @@ export default async function EventSignupsPage({ params }: { params: Promise<{ i
                 <td className="p-3 text-papa-muted">—</td>
                 <td className="p-3">{profileDisplay(s)}</td>
                 <td className="p-3 font-mono text-sm text-papa-muted" title="Discord handle for contact">{discordHandle(s)}</td>
+                <td className="p-3 text-papa-muted">{s.role ?? '—'}</td>
                 <td className="p-3 text-papa-muted">{s.volunteer_status ?? '—'}</td>
                 <td className="p-3 text-papa-muted">{s.phone ?? '—'}</td>
                 <td className="p-3 text-papa-muted">{s.is_local === true ? 'Yes' : s.is_local === false ? 'No' : '—'}</td>

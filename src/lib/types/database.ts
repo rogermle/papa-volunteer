@@ -40,11 +40,26 @@ export interface Event {
   updated_at: string
 }
 
+/** Event role when signing up (what they will do at the event). */
+export type SignupRole = 'Volunteer' | 'Lead Volunteer' | 'Photographer'
+
+export const SIGNUP_ROLES: SignupRole[] = ['Volunteer', 'Lead Volunteer', 'Photographer']
+
+export const SIGNUP_ROLE_DESCRIPTIONS: Record<SignupRole, string> = {
+  'Volunteer':
+    'Staff the table, greet/recruit attendees to join PAPA, hand out materials/PAPA swag, and share your pilot experience!',
+  'Lead Volunteer':
+    'Coordinate with the team, help set up and tear down, and be a main point of contact for the event.',
+  'Photographer':
+    'Capture photos and short clips of the event for PAPA social media and newsletter.',
+}
+
 export interface EventSignup {
   id: string
   event_id: string
   user_id: string
   waitlist_position: number | null
+  role: SignupRole | null
   volunteer_status: string | null
   phone: string | null
   is_local: boolean | null

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { SIGNUP_ROLES, type SignupRole } from '@/lib/types/database'
 
 export async function signUpForEvent(formData: FormData) {
   const eventId = formData.get('eventId') as string
@@ -41,6 +42,9 @@ export async function signUpForEvent(formData: FormData) {
     waitlistPosition = (lastWaitlist?.waitlist_position ?? 0) + 1
   }
 
+  const roleRaw = (formData.get('role') as string)?.trim() || null
+  const role: SignupRole | null =
+    roleRaw && SIGNUP_ROLES.includes(roleRaw as SignupRole) ? (roleRaw as SignupRole) : null
   const volunteerStatus = (formData.get('volunteer_status') as string)?.trim() || null
   const phoneRaw = (formData.get('phone') as string)?.trim() || ''
   const phone = phoneRaw.replace(/\D/g, '').length >= 10 ? phoneRaw : null
@@ -54,6 +58,7 @@ export async function signUpForEvent(formData: FormData) {
     event_id: eventId,
     user_id: user.id,
     waitlist_position: waitlistPosition,
+    role,
     volunteer_status: volunteerStatus,
     phone,
     is_local: isLocal,

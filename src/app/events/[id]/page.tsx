@@ -30,7 +30,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
   const { data: signups } = await supabase
     .from('event_signups')
     .select(`
-      id, user_id, waitlist_position, volunteer_status, phone, is_local, flight_voucher_requested, availability_notes, travel_notes, created_at,
+      id, user_id, waitlist_position, role, volunteer_status, phone, is_local, flight_voucher_requested, availability_notes, travel_notes, created_at,
       profiles:user_id ( discord_username )
     `)
     .eq('event_id', id)
@@ -46,7 +46,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
     } else {
       const { data: direct } = await supabase
         .from('event_signups')
-        .select('id, user_id, waitlist_position, volunteer_status, phone, is_local, flight_voucher_requested, availability_notes, travel_notes, created_at')
+        .select('id, user_id, waitlist_position, role, volunteer_status, phone, is_local, flight_voucher_requested, availability_notes, travel_notes, created_at')
         .eq('event_id', id)
         .eq('user_id', user.id)
         .maybeSingle()
@@ -132,6 +132,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
             confirmedCount={confirmed.length}
             mySignup={mySignup ? {
               waitlist_position: mySignup.waitlist_position,
+              role: mySignup.role ?? null,
               volunteer_status: mySignup.volunteer_status ?? null,
               phone: mySignup.phone ?? null,
               is_local: mySignup.is_local ?? null,

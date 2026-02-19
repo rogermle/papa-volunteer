@@ -16,7 +16,7 @@ export default async function MySignupsPage() {
     .from("event_signups")
     .select(
       `
-      id, event_id, waitlist_position, created_at,
+      id, event_id, waitlist_position, role, created_at,
       events ( id, title, start_date, end_date, start_time, end_time, timezone, location, image_url )
     `,
     )
@@ -121,11 +121,18 @@ export default async function MySignupsPage() {
                       {timeStr && ` · ${timeStr} ${tz}`}
                       {ev.location && ` · ${ev.location}`}
                     </div>
-                    {onWaitlist && (
-                      <span className="mt-1 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">
-                        Waitlist #{s.waitlist_position}
-                      </span>
-                    )}
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                      {s.role && (
+                        <span className="inline-block rounded bg-papa-navy/10 px-1.5 py-0.5 text-xs text-papa-navy">
+                          {s.role}
+                        </span>
+                      )}
+                      {onWaitlist && (
+                        <span className="inline-block rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">
+                          Waitlist #{s.waitlist_position}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <CancelSignupButton eventId={ev.id} />
                 </div>
