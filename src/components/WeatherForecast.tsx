@@ -18,8 +18,11 @@ type Props = {
   locationLabel?: string | null;
 };
 
+const MAX_DAYS = 5;
+
 export function WeatherForecast({ days, compact, fetchedAt, locationLabel }: Props) {
-  if (!days.length) return null;
+  const displayDays = days.slice(0, MAX_DAYS);
+  if (!displayDays.length) return null;
 
   return (
     <div className={compact ? "flex flex-wrap gap-2" : "rounded-lg border border-papa-border bg-papa-offwhite/50 p-3"}>
@@ -31,22 +34,22 @@ export function WeatherForecast({ days, compact, fetchedAt, locationLabel }: Pro
           <p className="mt-0.5 text-xs text-papa-muted">{locationLabel.trim()}</p>
         )}
       </div>
-      <div className={compact ? "flex gap-3" : "grid grid-cols-3 gap-2"}>
-        {days.map((d) => (
+      <div className={compact ? "grid grid-cols-2 gap-2 sm:grid-cols-5 sm:gap-2" : "grid grid-cols-2 gap-2 sm:grid-cols-5"}>
+        {displayDays.map((d) => (
           <div
             key={d.date}
             className={
               compact
-                ? "flex items-center gap-1.5 rounded border border-papa-border bg-background px-2 py-1 text-xs"
-                : "rounded border border-papa-border bg-background p-2 text-center text-sm"
+                ? "flex min-w-0 flex-col gap-0.5 rounded border border-papa-border bg-background px-2 py-1.5 text-xs"
+                : "min-w-0 rounded border border-papa-border bg-background p-2 text-center text-sm"
             }
           >
             <span className={compact ? "font-medium text-foreground" : "block font-medium text-foreground"} title={formatDayLabel(d, false)}>{formatDayLabel(d, compact)}</span>
             {compact ? (
-              <>
+              <span className="flex items-center gap-1">
                 <span className="text-lg" aria-hidden>{d.weatherIcon}</span>
-                <span className="text-papa-muted capitalize">{d.weatherLabel}</span>
-              </>
+                <span className="truncate text-papa-muted capitalize">{d.weatherLabel}</span>
+              </span>
             ) : (
               <span className="block text-foreground text-papa-muted"><span className="text-lg" aria-hidden>{d.weatherIcon}</span> {d.weatherLabel}</span>
             )}

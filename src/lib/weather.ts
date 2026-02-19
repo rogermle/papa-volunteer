@@ -93,7 +93,7 @@ function celsiusToF(n: number): number {
 }
 
 /**
- * First 3 days of the event: start_date, start_date+1, start_date+2 (capped at end_date).
+ * First 5 days of the event (capped at end_date).
  */
 export function getEventForecastDateRange(
   startDate: string,
@@ -103,11 +103,9 @@ export function getEventForecastDateRange(
   const end = endDate.slice(0, 10);
   const startD = new Date(start + "T12:00:00Z");
   const endD = new Date(end + "T12:00:00Z");
-  const day2 = new Date(startD);
-  day2.setUTCDate(day2.getUTCDate() + 1);
-  const day3 = new Date(startD);
-  day3.setUTCDate(day3.getUTCDate() + 2);
-  const last = day3.getTime() > endD.getTime() ? endD : day3;
+  const day5 = new Date(startD);
+  day5.setUTCDate(day5.getUTCDate() + 4);
+  const last = day5.getTime() > endD.getTime() ? endD : day5;
   const lastStr = last.toISOString().slice(0, 10);
   return { start, end: lastStr };
 }
