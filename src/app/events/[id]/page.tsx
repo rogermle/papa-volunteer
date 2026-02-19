@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase/server'
 import { TIMEZONE_LABELS, formatTimeLocal, formatScheduleDay, formatScheduleTimeWithTz } from '@/lib/types/database'
 import type { Timezone, VolunteerScheduleRow } from '@/lib/types/database'
 import { geocodeAddress, looksLikeAddress } from '@/lib/geocode'
+import { fetchForecast, getEventForecastDateRange } from '@/lib/weather'
+import { WeatherForecast } from '@/components/WeatherForecast'
 import { EventActionBanner } from './EventActionBanner'
 import { EventSignupButtons } from './EventSignupButtons'
 
@@ -74,6 +76,14 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
   const mapCoords = event.location && looksLikeAddress(event.location)
     ? await geocodeAddress(event.location)
     : null
+
+  const isSignedUp = !!mySignup && mySignup.waitlist_position == null
+  const forecastDates = getEventForecastDateRange(event.start_date, event.end_date)
+  const eventForecast =
+    isSignedUp && mapCoords
+      ? await fetchForecast(mapCoords.lat, mapCoords.lon, forecastDates.start, forecastDates.end)
+      : []
+  const weatherFetchedAt = eventForecast.length > 0 ? Date.now() : undefined
 
   return (
     <div className="flex flex-col gap-6">
@@ -145,6 +155,11 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
             eventEndDate={event.end_date}
           />
         </div>
+        {eventForecast.length > 0 && (
+          <div className="mt-4">
+            <WeatherForecast days={eventForecast} fetchedAt={weatherFetchedAt} locationLabel={event.location} />
+          </div>
+        )}
         </div>
       </div>
       {mapCoords && (

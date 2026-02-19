@@ -8,6 +8,9 @@ import {
   formatScheduleTimeWithTz,
 } from "@/lib/types/database";
 import type { Timezone, VolunteerScheduleRow } from "@/lib/types/database";
+import { geocodeAddress, looksLikeAddress } from "@/lib/geocode";
+import { fetchForecast, getEventForecastDateRange } from "@/lib/weather";
+import { WeatherForecast } from "@/components/WeatherForecast";
 import { CancelSignupButton } from "@/app/my-signups/CancelSignupButton";
 
 export default async function MySchedulePage() {
@@ -50,6 +53,23 @@ export default async function MySchedulePage() {
     const dB = (evB as { start_date: string }).start_date;
     return dA.localeCompare(dB);
   });
+
+  type WeatherBlock = { days: import("@/lib/weather").ForecastDay[]; fetchedAt: number };
+  const weatherByEventId = new Map<string, WeatherBlock>();
+  await Promise.all(
+    byStartDate.map(async (s) => {
+      const raw = s.events;
+      const event = Array.isArray(raw) ? raw[0] : raw;
+      if (!event || typeof event !== "object") return;
+      const ev = event as { id: string; location: string | null; start_date: string; end_date: string };
+      if (!ev.location?.trim() || !looksLikeAddress(ev.location)) return;
+      const coords = await geocodeAddress(ev.location);
+      if (!coords) return;
+      const range = getEventForecastDateRange(ev.start_date, ev.end_date);
+      const days = await fetchForecast(coords.lat, coords.lon, range.start, range.end);
+      if (days.length) weatherByEventId.set(ev.id, { days, fetchedAt: Date.now() });
+    })
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -170,6 +190,14 @@ export default async function MySchedulePage() {
                     </div>
                     <CancelSignupButton eventId={ev.id} />
                   </div>
+                  {(() => {
+                    const block = weatherByEventId.get(ev.id);
+                    return block?.days.length ? (
+                      <div className="mt-3">
+                        <WeatherForecast days={block.days} compact fetchedAt={block.fetchedAt} locationLabel={ev.location} />
+                      </div>
+                    ) : null;
+                  })()}
                   {(ev.volunteer_schedule?.length ?? 0) > 0 && (
                     <div className="mt-4 overflow-x-auto rounded-lg border border-papa-border bg-background">
                       <h3 className="border-b border-papa-border px-3 py-2 text-xs font-medium uppercase tracking-wide text-papa-muted">

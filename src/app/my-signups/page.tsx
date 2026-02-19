@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { TIMEZONE_LABELS, formatTimeLocal } from "@/lib/types/database";
 import type { Timezone } from "@/lib/types/database";
+import { geocodeAddress, looksLikeAddress } from "@/lib/geocode";
+import { fetchForecast, getEventForecastDateRange } from "@/lib/weather";
+import { WeatherForecast } from "@/components/WeatherForecast";
 import { CancelSignupButton } from "./CancelSignupButton";
 
 export default async function MySignupsPage() {
@@ -33,6 +36,23 @@ export default async function MySignupsPage() {
     start === end
       ? formatDate(start)
       : `${formatDate(start)} – ${formatDate(end)}`;
+
+  type WeatherBlock = { days: import("@/lib/weather").ForecastDay[]; fetchedAt: number };
+  const weatherByEventId = new Map<string, WeatherBlock>();
+  await Promise.all(
+    (signups ?? []).map(async (s) => {
+      const raw = s.events;
+      const event = Array.isArray(raw) ? raw[0] : raw;
+      if (!event || typeof event !== "object") return;
+      const ev = event as { id: string; location: string | null; start_date: string; end_date: string };
+      if (!ev.location?.trim() || !looksLikeAddress(ev.location)) return;
+      const coords = await geocodeAddress(ev.location);
+      if (!coords) return;
+      const range = getEventForecastDateRange(ev.start_date, ev.end_date);
+      const days = await fetchForecast(coords.lat, coords.lon, range.start, range.end);
+      if (days.length) weatherByEventId.set(ev.id, { days, fetchedAt: Date.now() });
+    })
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -151,6 +171,14 @@ export default async function MySignupsPage() {
                   </div>
                   <CancelSignupButton eventId={ev.id} />
                 </div>
+                {(() => {
+                const block = weatherByEventId.get(ev.id);
+                return block?.days.length ? (
+                  <div className="px-4 pb-4">
+                    <WeatherForecast days={block.days} compact fetchedAt={block.fetchedAt} locationLabel={ev.location} />
+                  </div>
+                ) : null;
+              })()}
               </li>
             );
           })}
