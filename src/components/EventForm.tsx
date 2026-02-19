@@ -273,6 +273,25 @@ export function EventForm({ event }: Props) {
       </div>
       <div>
         <label
+          htmlFor="discord_invite_url"
+          className="mb-1 block text-sm papa-form-label"
+        >
+          Discord invite URL (optional)
+        </label>
+        <input
+          id="discord_invite_url"
+          name="discord_invite_url"
+          type="url"
+          placeholder="https://discord.gg/..."
+          defaultValue={event?.discord_invite_url ?? ""}
+          className="papa-form-input w-full rounded bg-background px-3 py-2 text-foreground"
+        />
+        <p className="mt-0.5 text-xs text-papa-muted">
+          Shown to confirmed volunteers until the event end date.
+        </p>
+      </div>
+      <div>
+        <label
           htmlFor="image_url"
           className="mb-1 block text-sm papa-form-label"
         >

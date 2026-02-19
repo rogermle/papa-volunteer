@@ -10,10 +10,18 @@ import {
   type SignupRole,
 } from "@/lib/types/database";
 
+function showDiscordLink(discordInviteUrl: string | null, eventEndDate: string): boolean {
+  if (!discordInviteUrl?.trim()) return false;
+  const today = new Date().toISOString().slice(0, 10);
+  return eventEndDate >= today;
+}
+
 type Props = {
   eventId: string;
   full: boolean;
   onCancel?: () => void;
+  discordInviteUrl?: string | null;
+  eventEndDate?: string;
 };
 
 const STATUS_OPTIONS = [
@@ -26,7 +34,7 @@ const STATUS_OPTIONS = [
   "Other",
 ];
 
-export function VolunteerSignupForm({ eventId, full, onCancel }: Props) {
+export function VolunteerSignupForm({ eventId, full, onCancel, discordInviteUrl = null, eventEndDate = "" }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<"signed_up" | "waitlist" | null>(null);
@@ -53,6 +61,7 @@ export function VolunteerSignupForm({ eventId, full, onCancel }: Props) {
   }
 
   if (success) {
+    const showLink = success === "signed_up" && showDiscordLink(discordInviteUrl ?? null, eventEndDate);
     return (
       <div
         className="mt-4 rounded-xl border border-green-200 bg-green-50 p-4"
@@ -63,6 +72,18 @@ export function VolunteerSignupForm({ eventId, full, onCancel }: Props) {
             ? "You're on the waitlist!"
             : "You're signed up!"}
         </p>
+        {showLink && discordInviteUrl && (
+          <p className="mt-3">
+            <a
+              href={discordInviteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center rounded bg-[#5865F2] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#4752C4]"
+            >
+              Join volunteer Discord channel
+            </a>
+          </p>
+        )}
       </div>
     );
   }

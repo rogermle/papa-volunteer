@@ -16,6 +16,7 @@ function parseFormEvent(formData: FormData) {
   const location = (formData.get('location') as string)?.trim() || null
   const description = (formData.get('description') as string)?.trim() || null
   const external_link = (formData.get('external_link') as string)?.trim() || null
+  const discord_invite_url = (formData.get('discord_invite_url') as string)?.trim() || null
   const image_url = (formData.get('image_url') as string)?.trim() || null
   const volunteer_details = (formData.get('volunteer_details') as string)?.trim() || null
   let volunteer_schedule: VolunteerScheduleRow[] = []
@@ -52,6 +53,7 @@ function parseFormEvent(formData: FormData) {
     location,
     description,
     external_link,
+    discord_invite_url,
     image_url,
     volunteer_details,
     volunteer_schedule,

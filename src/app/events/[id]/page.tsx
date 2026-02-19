@@ -141,6 +141,8 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
               travel_notes: mySignup.travel_notes ?? null,
             } : null}
             isLoggedIn={!!user}
+            discordInviteUrl={event.discord_invite_url ?? null}
+            eventEndDate={event.end_date}
           />
         </div>
         </div>

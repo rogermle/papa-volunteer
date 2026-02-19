@@ -23,9 +23,17 @@ type Props = {
   confirmedCount: number
   mySignup: MySignup | null
   isLoggedIn: boolean
+  discordInviteUrl: string | null
+  eventEndDate: string
 }
 
-export function EventSignupButtons({ eventId, capacity, confirmedCount, mySignup, isLoggedIn }: Props) {
+function showDiscordLink(discordInviteUrl: string | null, eventEndDate: string): boolean {
+  if (!discordInviteUrl?.trim()) return false
+  const today = new Date().toISOString().slice(0, 10)
+  return eventEndDate >= today
+}
+
+export function EventSignupButtons({ eventId, capacity, confirmedCount, mySignup, isLoggedIn, discordInviteUrl, eventEndDate }: Props) {
   const full = confirmedCount >= capacity
   const [showSignupForm, setShowSignupForm] = useState(false)
   const [leaving, setLeaving] = useState(false)
@@ -64,6 +72,7 @@ export function EventSignupButtons({ eventId, capacity, confirmedCount, mySignup
 
   if (mySignup) {
     const onWaitlist = mySignup.waitlist_position != null
+    const showLink = !onWaitlist && showDiscordLink(discordInviteUrl, eventEndDate)
     const hasDetails = mySignup.role || mySignup.volunteer_status || mySignup.phone != null || mySignup.is_local != null || mySignup.flight_voucher_requested != null || mySignup.availability_notes || mySignup.travel_notes
     return (
       <div className="mt-2 w-full rounded-xl border border-green-200 bg-green-50/80 p-4">
@@ -77,6 +86,18 @@ export function EventSignupButtons({ eventId, capacity, confirmedCount, mySignup
             </span>
           )}
         </div>
+        {showLink && discordInviteUrl && (
+          <p className="mt-3">
+            <a
+              href={discordInviteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center rounded bg-[#5865F2] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#4752C4]"
+            >
+              Join volunteer Discord channel
+            </a>
+          </p>
+        )}
         {hasDetails && (
           <dl className="mt-3 grid gap-1.5 text-sm text-green-900/90">
             {mySignup.role && (
@@ -168,6 +189,8 @@ export function EventSignupButtons({ eventId, capacity, confirmedCount, mySignup
         eventId={eventId}
         full={full}
         onCancel={() => setShowSignupForm(false)}
+        discordInviteUrl={discordInviteUrl}
+        eventEndDate={eventEndDate}
       />
     )
   }

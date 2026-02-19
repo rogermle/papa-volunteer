@@ -17,7 +17,7 @@ export default async function MySignupsPage() {
     .select(
       `
       id, event_id, waitlist_position, role, created_at,
-      events ( id, title, start_date, end_date, start_time, end_time, timezone, location, image_url )
+      events ( id, title, start_date, end_date, start_time, end_time, timezone, location, image_url, discord_invite_url )
     `,
     )
     .eq("user_id", user.id)
@@ -67,6 +67,7 @@ export default async function MySignupsPage() {
               timezone: string;
               location: string | null;
               image_url: string | null;
+              discord_invite_url: string | null;
             };
             const tz = TIMEZONE_LABELS[ev.timezone as Timezone] ?? ev.timezone;
             const timeStr =
@@ -74,6 +75,8 @@ export default async function MySignupsPage() {
                 .filter(Boolean)
                 .join(" – ") || null;
             const onWaitlist = s.waitlist_position != null;
+            const today = new Date().toISOString().slice(0, 10);
+            const showDiscordLink = !onWaitlist && ev.discord_invite_url?.trim() && ev.end_date >= today;
             return (
               <li
                 key={s.id}
@@ -133,6 +136,18 @@ export default async function MySignupsPage() {
                         </span>
                       )}
                     </div>
+                    {showDiscordLink && ev.discord_invite_url && (
+                      <p className="mt-2">
+                        <a
+                          href={ev.discord_invite_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center rounded bg-[#5865F2] px-2.5 py-1 text-sm font-medium text-white hover:bg-[#4752C4]"
+                        >
+                          Join volunteer Discord channel
+                        </a>
+                      </p>
+                    )}
                   </div>
                   <CancelSignupButton eventId={ev.id} />
                 </div>

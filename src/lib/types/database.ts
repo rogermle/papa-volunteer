@@ -32,6 +32,7 @@ export interface Event {
   location: string | null
   description: string | null
   external_link: string | null
+  discord_invite_url: string | null
   image_url: string | null
   volunteer_details: string | null
   volunteer_schedule: VolunteerScheduleRow[]
