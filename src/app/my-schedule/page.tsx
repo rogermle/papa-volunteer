@@ -188,7 +188,15 @@ export default async function MySchedulePage() {
                         </p>
                       )}
                     </div>
-                    <CancelSignupButton eventId={ev.id} />
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <Link
+                        href={`/events/${ev.id}?edit=1`}
+                        className="rounded border border-papa-border bg-white px-3 py-1.5 text-sm font-medium text-foreground hover:bg-papa-card"
+                      >
+                        Edit signup
+                      </Link>
+                      <CancelSignupButton eventId={ev.id} />
+                    </div>
                   </div>
                   {(() => {
                     const block = weatherByEventId.get(ev.id);

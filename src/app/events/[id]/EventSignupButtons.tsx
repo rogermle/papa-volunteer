@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { leaveEvent } from '@/app/actions/signup'
 import { VolunteerSignupForm } from './VolunteerSignupForm'
 
@@ -35,11 +35,17 @@ function showDiscordLink(discordInviteUrl: string | null, eventEndDate: string):
 
 export function EventSignupButtons({ eventId, capacity, confirmedCount, mySignup, isLoggedIn, discordInviteUrl, eventEndDate }: Props) {
   const full = confirmedCount >= capacity
+  const searchParams = useSearchParams()
   const [showSignupForm, setShowSignupForm] = useState(false)
+  const [showEditForm, setShowEditForm] = useState(false)
   const [leaving, setLeaving] = useState(false)
   const [leaveError, setLeaveError] = useState<string | null>(null)
   const [confirming, setConfirming] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    if (mySignup && searchParams.get('edit') === '1') setShowEditForm(true)
+  }, [mySignup, searchParams])
 
   async function handleLeave(formData: FormData) {
     setLeaveError(null)
@@ -67,6 +73,28 @@ export function EventSignupButtons({ eventId, capacity, confirmedCount, mySignup
           Sign in with Discord
         </Link>
       </div>
+    )
+  }
+
+  if (mySignup && showEditForm) {
+    return (
+      <VolunteerSignupForm
+        eventId={eventId}
+        full={confirmedCount >= capacity}
+        mode="edit"
+        initialValues={{
+          role: mySignup.role,
+          volunteer_status: mySignup.volunteer_status,
+          phone: mySignup.phone,
+          is_local: mySignup.is_local,
+          flight_voucher_requested: mySignup.flight_voucher_requested,
+          availability_notes: mySignup.availability_notes,
+          travel_notes: mySignup.travel_notes,
+        }}
+        onSaved={() => setShowEditForm(false)}
+        discordInviteUrl={discordInviteUrl}
+        eventEndDate={eventEndDate}
+      />
     )
   }
 
@@ -148,6 +176,13 @@ export function EventSignupButtons({ eventId, capacity, confirmedCount, mySignup
           {leaveError && (
             <p className="text-sm text-red-600" role="alert">{leaveError}</p>
           )}
+          <button
+            type="button"
+            onClick={() => setShowEditForm(true)}
+            className="rounded border border-green-300 bg-white px-3 py-1.5 text-sm font-medium text-green-800 hover:bg-green-100"
+          >
+            Edit my signup
+          </button>
           {confirming ? (
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-sm text-foreground">Are you sure? This will remove your sign-up.</span>

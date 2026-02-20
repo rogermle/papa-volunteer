@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signUpForEvent } from "@/app/actions/signup";
+import { signUpForEvent, updateSignup } from "@/app/actions/signup";
 import { PhoneInput } from "@/components/PhoneInput";
 import {
   SIGNUP_ROLES,
@@ -16,12 +16,25 @@ function showDiscordLink(discordInviteUrl: string | null, eventEndDate: string):
   return eventEndDate >= today;
 }
 
+export type SignupFormInitialValues = {
+  role: string | null;
+  volunteer_status: string | null;
+  phone: string | null;
+  is_local: boolean | null;
+  flight_voucher_requested: boolean | null;
+  availability_notes: string | null;
+  travel_notes: string | null;
+};
+
 type Props = {
   eventId: string;
   full: boolean;
   onCancel?: () => void;
+  onSaved?: () => void;
   discordInviteUrl?: string | null;
   eventEndDate?: string;
+  mode?: "signup" | "edit";
+  initialValues?: SignupFormInitialValues | null;
 };
 
 const STATUS_OPTIONS = [
@@ -34,33 +47,72 @@ const STATUS_OPTIONS = [
   "Other",
 ];
 
-export function VolunteerSignupForm({ eventId, full, onCancel, discordInviteUrl = null, eventEndDate = "" }: Props) {
+export function VolunteerSignupForm({
+  eventId,
+  full,
+  onCancel,
+  onSaved,
+  discordInviteUrl = null,
+  eventEndDate = "",
+  mode = "signup",
+  initialValues = null,
+}: Props) {
+  const isEdit = mode === "edit";
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<"signed_up" | "waitlist" | null>(null);
+  const [success, setSuccess] = useState<"signed_up" | "waitlist" | "updated" | null>(null);
   const [selectedRole, setSelectedRole] = useState<SignupRole | "">(
-    "Volunteer",
+    isEdit && initialValues?.role && SIGNUP_ROLES.includes(initialValues.role as SignupRole)
+      ? (initialValues.role as SignupRole)
+      : "Volunteer"
   );
   const router = useRouter();
 
   async function handleSubmit(formData: FormData) {
     setError(null);
     setSubmitting(true);
-    const result = await signUpForEvent(formData);
+    const result = isEdit
+      ? await updateSignup(formData)
+      : await signUpForEvent(formData);
     setSubmitting(false);
     if (result && "error" in result) {
-      if (result.error === "You are already signed up for this event.") {
+      if (!isEdit && result.error === "You are already signed up for this event.") {
         router.refresh();
         return;
       }
       setError(result.error ?? "Something went wrong.");
       return;
     }
-    setSuccess(result?.waitlist ? "waitlist" : "signed_up");
+    if (isEdit) {
+      setSuccess("updated");
+      router.refresh();
+      onSaved?.();
+      return;
+    }
+    setSuccess(
+      result && "waitlist" in result && result.waitlist ? "waitlist" : "signed_up"
+    );
     router.refresh();
   }
 
-  if (success) {
+  if (success === "updated") {
+    return (
+      <div className="mt-4 rounded-xl border border-green-200 bg-green-50 p-4" role="status">
+        <p className="font-medium text-green-800">Your signup has been updated.</p>
+        {onSaved && (
+          <button
+            type="button"
+            onClick={onSaved}
+            className="mt-3 rounded border border-green-300 bg-white px-3 py-1.5 text-sm text-green-800 hover:bg-green-100"
+          >
+            Done
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  if (success && (success === "signed_up" || success === "waitlist")) {
     const showLink = success === "signed_up" && showDiscordLink(discordInviteUrl ?? null, eventEndDate);
     return (
       <div
@@ -103,10 +155,10 @@ export function VolunteerSignupForm({ eventId, full, onCancel, discordInviteUrl 
         </p>
       )}
       <h3 className="mb-3 text-sm font-semibold text-foreground">
-        Volunteer Information
+        {isEdit ? "Edit your signup" : "Volunteer Information"}
       </h3>
       <p className="mb-4 text-xs text-papa-muted">
-        
+        {isEdit ? "Update your role, contact info, or notes below." : ""}
       </p>
       <div className="mb-4">
         <label
@@ -153,6 +205,7 @@ export function VolunteerSignupForm({ eventId, full, onCancel, discordInviteUrl 
           <select
             id="volunteer_status"
             name="volunteer_status"
+            defaultValue={isEdit ? (initialValues?.volunteer_status ?? "") : ""}
             className="w-full rounded border border-papa-border bg-background px-3 py-2 text-sm text-foreground"
           >
             {STATUS_OPTIONS.map((opt) => (
@@ -175,6 +228,7 @@ export function VolunteerSignupForm({ eventId, full, onCancel, discordInviteUrl 
           <PhoneInput
             id="phone"
             name="phone"
+            defaultValue={isEdit ? (initialValues?.phone ?? "") : ""}
             placeholder="(555) 123-4567"
             className="w-full rounded border border-papa-border bg-background px-3 py-2 text-sm text-foreground"
             required
@@ -188,6 +242,7 @@ export function VolunteerSignupForm({ eventId, full, onCancel, discordInviteUrl 
             id="is_local"
             name="is_local"
             value="on"
+            defaultChecked={isEdit ? (initialValues?.is_local ?? false) : false}
             className="h-4 w-4 rounded border-papa-border text-papa-navy"
           />
           <label htmlFor="is_local" className="text-sm text-foreground">
@@ -200,6 +255,7 @@ export function VolunteerSignupForm({ eventId, full, onCancel, discordInviteUrl 
             id="flight_voucher_requested"
             name="flight_voucher_requested"
             value="on"
+            defaultChecked={isEdit ? (initialValues?.flight_voucher_requested ?? false) : false}
             className="h-4 w-4 rounded border-papa-border text-papa-navy"
           />
           <label
@@ -221,6 +277,7 @@ export function VolunteerSignupForm({ eventId, full, onCancel, discordInviteUrl 
           id="availability_notes"
           name="availability_notes"
           rows={2}
+          defaultValue={isEdit ? (initialValues?.availability_notes ?? "") : ""}
           placeholder="e.g. 9-11 AM only, or when you can staff the table if you’re also attending as a job seeker"
           className="w-full rounded border border-papa-border bg-background px-3 py-2 text-sm text-foreground"
         />
@@ -237,6 +294,7 @@ export function VolunteerSignupForm({ eventId, full, onCancel, discordInviteUrl 
           id="travel_notes"
           name="travel_notes"
           rows={2}
+          defaultValue={isEdit ? (initialValues?.travel_notes ?? "") : ""}
           placeholder="e.g. Arrival/Departure times, Hotel or Airbnb desired, or if local and can you pick up volunteers"
           className="w-full rounded border border-papa-border bg-background px-3 py-2 text-sm text-foreground"
         />
@@ -248,18 +306,20 @@ export function VolunteerSignupForm({ eventId, full, onCancel, discordInviteUrl 
           className="rounded bg-papa-accent px-4 py-2 text-sm font-medium text-white hover:bg-papa-accent-hover disabled:opacity-50"
         >
           {submitting
-            ? "Submitting…"
-            : full
-              ? "Join waitlist"
-              : "Sign up to volunteer"}
+            ? (isEdit ? "Saving…" : "Submitting…")
+            : isEdit
+              ? "Save changes"
+              : full
+                ? "Join waitlist"
+                : "Sign up to volunteer"}
         </button>
-        {onCancel && (
+        {(onCancel || (isEdit && onSaved)) && (
           <button
             type="button"
-            onClick={onCancel}
+            onClick={() => (isEdit ? onSaved?.() : onCancel?.())}
             className="rounded border border-papa-border px-4 py-2 text-sm text-papa-muted hover:bg-papa-card hover:text-foreground"
           >
-            Cancel
+            {isEdit ? "Cancel" : "Cancel"}
           </button>
         )}
       </div>
