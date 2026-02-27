@@ -33,7 +33,9 @@ export default async function EventSignupsPage({ params }: { params: Promise<{ i
 
   const { data: signups } = await supabase
     .from('event_signups')
-    .select('id, user_id, waitlist_position, role, volunteer_status, phone, is_local, flight_voucher_requested, availability_notes, travel_notes, mailing_address, created_at')
+    .select(
+      'id, user_id, waitlist_position, role, volunteer_status, phone, is_local, flight_voucher_requested, availability_notes, travel_notes, mailing_address, created_at',
+    )
     .eq('event_id', id)
     .order('waitlist_position', { ascending: true, nullsFirst: true })
     .order('created_at', { ascending: true })
@@ -48,6 +50,21 @@ export default async function EventSignupsPage({ params }: { params: Promise<{ i
     ...s,
     profiles: profileByUserId.get(s.user_id) ?? null,
   }))
+
+  const signupIds = [...new Set(signupsWithProfiles.map((s) => s.id))]
+  const { data: shipments } = signupIds.length
+    ? await supabase
+        .from('shipments')
+        .select('id, to_signup_id')
+        .eq('event_id', id)
+        .in('to_signup_id', signupIds)
+    : { data: [] as any[] }
+  const shipmentCountBySignupId = new Map<string, number>()
+  ;(shipments ?? []).forEach((sh) => {
+    const key = (sh.to_signup_id ?? '') as string
+    if (!key) return
+    shipmentCountBySignupId.set(key, (shipmentCountBySignupId.get(key) ?? 0) + 1)
+  })
 
   const confirmed = signupsWithProfiles.filter((s) => s.waitlist_position == null)
   const waitlist = signupsWithProfiles.filter((s) => s.waitlist_position != null)
@@ -87,6 +104,7 @@ export default async function EventSignupsPage({ params }: { params: Promise<{ i
               <th className="p-3 font-medium text-foreground">Availability</th>
               <th className="p-3 font-medium text-foreground">Travel</th>
               <th className="p-3 font-medium text-foreground">Mailing address</th>
+              <th className="p-3 font-medium text-foreground">Shipments</th>
               <th className="p-3 font-medium text-foreground">List</th>
               <th className="p-3 font-medium text-foreground">Signed up</th>
             </tr>
@@ -113,6 +131,9 @@ export default async function EventSignupsPage({ params }: { params: Promise<{ i
                 <td className="max-w-[180px] p-3 text-papa-muted" title={s.role === 'Lead Volunteer' ? (s.mailing_address ?? '') : ''}>
                   {s.role === 'Lead Volunteer' ? ((s.mailing_address ?? '—').slice(0, 50) + ((s.mailing_address?.length ?? 0) > 50 ? '…' : '')) : '—'}
                 </td>
+                <td className="p-3 text-papa-muted">
+                  {shipmentCountBySignupId.get(s.id) ? `${shipmentCountBySignupId.get(s.id)} shipment(s)` : '—'}
+                </td>
                 <td className="p-3">Confirmed</td>
                 <td className="p-3 text-papa-muted">{new Date(s.created_at).toLocaleString()}</td>
               </tr>
@@ -137,6 +158,9 @@ export default async function EventSignupsPage({ params }: { params: Promise<{ i
                 </td>
                 <td className="max-w-[180px] p-3 text-papa-muted" title={s.role === 'Lead Volunteer' ? (s.mailing_address ?? '') : ''}>
                   {s.role === 'Lead Volunteer' ? ((s.mailing_address ?? '—').slice(0, 50) + ((s.mailing_address?.length ?? 0) > 50 ? '…' : '')) : '—'}
+                </td>
+                <td className="p-3 text-papa-muted">
+                  {shipmentCountBySignupId.get(s.id) ? `${shipmentCountBySignupId.get(s.id)} shipment(s)` : '—'}
                 </td>
                 <td className="p-3 text-amber-600">Waitlist #{s.waitlist_position}</td>
                 <td className="p-3 text-papa-muted">{new Date(s.created_at).toLocaleString()}</td>

@@ -73,6 +73,32 @@ export interface EventSignup {
   created_at: string
 }
 
+export type Carrier = 'USPS'
+
+export type ShipmentStatus =
+  | 'Pre-Shipment'
+  | 'In Transit'
+  | 'Out for Delivery'
+  | 'Delivered'
+  | 'Exception'
+  | 'Unknown'
+
+export interface Shipment {
+  id: string
+  event_id: string | null
+  to_signup_id: string | null
+  from_profile_id: string | null
+  carrier: Carrier
+  tracking_number: string
+  status: ShipmentStatus | null
+  expected_delivery_date: string | null
+  last_checked_at: string | null
+  delivered_at: string | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface EventWithSignups extends Event {
   signups: (EventSignup & { profile?: Profile | null })[]
   signup_count: number
