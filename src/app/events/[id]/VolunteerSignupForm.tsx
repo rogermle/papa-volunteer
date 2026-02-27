@@ -24,6 +24,9 @@ export type SignupFormInitialValues = {
   flight_voucher_requested: boolean | null;
   availability_notes: string | null;
   travel_notes: string | null;
+  mailing_address: string | null;
+  mailing_address_lat: number | null;
+  mailing_address_lon: number | null;
 };
 
 type Props = {
@@ -299,6 +302,28 @@ export function VolunteerSignupForm({
           className="w-full rounded border border-papa-border bg-background px-3 py-2 text-sm text-foreground"
         />
       </div>
+      {selectedRole === "Lead Volunteer" && (
+        <div className="mt-4">
+          <label
+            htmlFor="mailing_address"
+            className="mb-1 block text-xs font-medium text-foreground"
+          >
+            Mailing address <span className="text-papa-accent">*</span>
+          </label>
+          <textarea
+            id="mailing_address"
+            name="mailing_address"
+            rows={3}
+            required
+            defaultValue={isEdit ? (initialValues?.mailing_address ?? "") : ""}
+            placeholder="Street, city, state, ZIP (we use this to mail you materials)"
+            className="w-full rounded border border-papa-border bg-background px-3 py-2 text-sm text-foreground"
+          />
+          <p className="mt-0.5 text-xs text-papa-muted">
+            Full address so we can mail you materials. We’ll validate it before saving.
+          </p>
+        </div>
+      )}
       <div className="mt-4 flex flex-wrap gap-2">
         <button
           type="submit"

@@ -67,6 +67,9 @@ export interface EventSignup {
   flight_voucher_requested: boolean | null
   availability_notes: string | null
   travel_notes: string | null
+  mailing_address: string | null
+  mailing_address_lat: number | null
+  mailing_address_lon: number | null
   created_at: string
 }
 

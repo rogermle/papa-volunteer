@@ -15,6 +15,9 @@ type MySignup = {
   flight_voucher_requested: boolean | null
   availability_notes: string | null
   travel_notes: string | null
+  mailing_address: string | null
+  mailing_address_lat: number | null
+  mailing_address_lon: number | null
 }
 
 type Props = {
@@ -90,6 +93,9 @@ export function EventSignupButtons({ eventId, capacity, confirmedCount, mySignup
           flight_voucher_requested: mySignup.flight_voucher_requested,
           availability_notes: mySignup.availability_notes,
           travel_notes: mySignup.travel_notes,
+          mailing_address: mySignup.mailing_address,
+          mailing_address_lat: mySignup.mailing_address_lat,
+          mailing_address_lon: mySignup.mailing_address_lon,
         }}
         onSaved={() => setShowEditForm(false)}
         discordInviteUrl={discordInviteUrl}

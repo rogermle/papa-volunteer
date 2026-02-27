@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { SIGNUP_ROLES, type SignupRole } from '@/lib/types/database'
+import { geocodeAddress } from '@/lib/geocode'
 
 export async function signUpForEvent(formData: FormData) {
   const eventId = formData.get('eventId') as string
@@ -54,6 +55,19 @@ export async function signUpForEvent(formData: FormData) {
   const availabilityNotes = (formData.get('availability_notes') as string)?.trim() || null
   const travelNotes = (formData.get('travel_notes') as string)?.trim() || null
 
+  let mailingAddress: string | null = null
+  let mailingAddressLat: number | null = null
+  let mailingAddressLon: number | null = null
+  if (role === 'Lead Volunteer') {
+    const raw = (formData.get('mailing_address') as string)?.trim() || null
+    if (!raw) return { error: 'Mailing address is required for Lead Volunteer.' }
+    const geocode = await geocodeAddress(raw)
+    if (!geocode) return { error: "We couldn't find this address. Please check and try again." }
+    mailingAddress = raw
+    mailingAddressLat = geocode.lat
+    mailingAddressLon = geocode.lon
+  }
+
   const { error } = await supabase.from('event_signups').insert({
     event_id: eventId,
     user_id: user.id,
@@ -65,6 +79,9 @@ export async function signUpForEvent(formData: FormData) {
     flight_voucher_requested: flightVoucherRequested,
     availability_notes: availabilityNotes,
     travel_notes: travelNotes,
+    mailing_address: mailingAddress,
+    mailing_address_lat: mailingAddressLat,
+    mailing_address_lon: mailingAddressLon,
   })
   if (error) return { error: error.message }
   revalidatePath(`/events/${eventId}`)
@@ -83,7 +100,7 @@ export async function updateSignup(formData: FormData) {
 
   const { data: existing } = await supabase
     .from('event_signups')
-    .select('id')
+    .select('id, mailing_address, mailing_address_lat, mailing_address_lon')
     .eq('event_id', eventId)
     .eq('user_id', user.id)
     .single()
@@ -101,17 +118,50 @@ export async function updateSignup(formData: FormData) {
   const availabilityNotes = (formData.get('availability_notes') as string)?.trim() || null
   const travelNotes = (formData.get('travel_notes') as string)?.trim() || null
 
+  let mailingAddress: string | null = (existing as any).mailing_address ?? null
+  let mailingAddressLat: number | null = (existing as any).mailing_address_lat ?? null
+  let mailingAddressLon: number | null = (existing as any).mailing_address_lon ?? null
+
+  if (role === 'Lead Volunteer') {
+    const raw = (formData.get('mailing_address') as string)?.trim() || null
+    if (!raw) return { error: 'Mailing address is required for Lead Volunteer.' }
+
+    const existingRaw = (existing as any).mailing_address?.trim() || null
+    if (existingRaw && raw === existingRaw) {
+      // Address unchanged: keep existing lat/lon and skip geocoding
+      mailingAddress = (existing as any).mailing_address ?? null
+      mailingAddressLat = (existing as any).mailing_address_lat ?? null
+      mailingAddressLon = (existing as any).mailing_address_lon ?? null
+    } else {
+      const geocode = await geocodeAddress(raw)
+      if (!geocode) return { error: "We couldn't find this address. Please check and try again." }
+      mailingAddress = raw
+      mailingAddressLat = geocode.lat
+      mailingAddressLon = geocode.lon
+    }
+  } else {
+    // When switching away from Lead Volunteer, clear address fields
+    mailingAddress = null
+    mailingAddressLat = null
+    mailingAddressLon = null
+  }
+
+  const updatePayload = {
+    role,
+    volunteer_status: volunteerStatus,
+    phone,
+    is_local: isLocal,
+    flight_voucher_requested: flightVoucherRequested,
+    availability_notes: availabilityNotes,
+    travel_notes: travelNotes,
+    mailing_address: mailingAddress,
+    mailing_address_lat: mailingAddressLat,
+    mailing_address_lon: mailingAddressLon,
+  }
+
   const { error } = await supabase
     .from('event_signups')
-    .update({
-      role,
-      volunteer_status: volunteerStatus,
-      phone,
-      is_local: isLocal,
-      flight_voucher_requested: flightVoucherRequested,
-      availability_notes: availabilityNotes,
-      travel_notes: travelNotes,
-    })
+    .update(updatePayload)
     .eq('event_id', eventId)
     .eq('user_id', user.id)
   if (error) return { error: error.message }
@@ -120,6 +170,14 @@ export async function updateSignup(formData: FormData) {
   revalidatePath('/my-schedule')
   revalidatePath('/calendar')
   return { ok: true }
+}
+
+export async function validateMailingAddress(address: string) {
+  const raw = address?.trim() || null
+  if (!raw) return { error: 'Please enter an address.' }
+  const result = await geocodeAddress(raw)
+  if (!result) return { error: "We couldn't find this address. Please check and try again." }
+  return { ok: true as const, lat: result.lat, lon: result.lon, displayName: result.displayName }
 }
 
 export async function leaveEvent(formData: FormData) {

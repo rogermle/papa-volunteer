@@ -40,11 +40,11 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
     .order('created_at', { ascending: true })
 
   type SignupRow = NonNullable<typeof signups> extends (infer R)[] ? R : never
-  let mySignup: SignupRow | null = null
+  let mySignup: (SignupRow & { mailing_address?: string | null; mailing_address_lat?: number | null; mailing_address_lon?: number | null }) | null = null
   if (user) {
-    const mine = signups?.find((s) => String(s.user_id).toLowerCase() === String(user.id).toLowerCase())
-    if (mine) {
-      mySignup = mine
+    const fromList = signups?.find((s) => String(s.user_id).toLowerCase() === String(user.id).toLowerCase())
+    if (fromList) {
+      mySignup = { ...fromList, mailing_address: null, mailing_address_lat: null, mailing_address_lon: null } as unknown as SignupRow & { mailing_address?: string | null; mailing_address_lat?: number | null; mailing_address_lon?: number | null }
     } else {
       const { data: direct } = await supabase
         .from('event_signups')
@@ -53,7 +53,23 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
         .eq('user_id', user.id)
         .maybeSingle()
       if (direct) {
-        mySignup = { ...direct, profiles: null } as unknown as SignupRow
+        mySignup = { ...direct, profiles: null, mailing_address: null, mailing_address_lat: null, mailing_address_lon: null } as unknown as SignupRow & { mailing_address?: string | null; mailing_address_lat?: number | null; mailing_address_lon?: number | null }
+      }
+    }
+    if (mySignup) {
+      const { data: addr, error: addrError } = await supabase
+        .from('event_signups')
+        .select('mailing_address, mailing_address_lat, mailing_address_lon')
+        .eq('event_id', id)
+        .eq('user_id', user.id)
+        .maybeSingle()
+      if (!addrError && addr) {
+        mySignup = {
+          ...mySignup,
+          mailing_address: addr.mailing_address ?? null,
+          mailing_address_lat: addr.mailing_address_lat ?? null,
+          mailing_address_lon: addr.mailing_address_lon ?? null,
+        }
       }
     }
   }
@@ -149,6 +165,9 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
               flight_voucher_requested: mySignup.flight_voucher_requested ?? null,
               availability_notes: mySignup.availability_notes ?? null,
               travel_notes: mySignup.travel_notes ?? null,
+              mailing_address: mySignup.mailing_address ?? null,
+              mailing_address_lat: mySignup.mailing_address_lat ?? null,
+              mailing_address_lon: mySignup.mailing_address_lon ?? null,
             } : null}
             isLoggedIn={!!user}
             discordInviteUrl={event.discord_invite_url ?? null}

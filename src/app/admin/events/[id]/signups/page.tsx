@@ -33,7 +33,7 @@ export default async function EventSignupsPage({ params }: { params: Promise<{ i
 
   const { data: signups } = await supabase
     .from('event_signups')
-    .select('id, user_id, waitlist_position, role, volunteer_status, phone, is_local, flight_voucher_requested, availability_notes, travel_notes, created_at')
+    .select('id, user_id, waitlist_position, role, volunteer_status, phone, is_local, flight_voucher_requested, availability_notes, travel_notes, mailing_address, created_at')
     .eq('event_id', id)
     .order('waitlist_position', { ascending: true, nullsFirst: true })
     .order('created_at', { ascending: true })
@@ -86,6 +86,7 @@ export default async function EventSignupsPage({ params }: { params: Promise<{ i
               <th className="p-3 font-medium text-foreground">Flight voucher</th>
               <th className="p-3 font-medium text-foreground">Availability</th>
               <th className="p-3 font-medium text-foreground">Travel</th>
+              <th className="p-3 font-medium text-foreground">Mailing address</th>
               <th className="p-3 font-medium text-foreground">List</th>
               <th className="p-3 font-medium text-foreground">Signed up</th>
             </tr>
@@ -109,6 +110,9 @@ export default async function EventSignupsPage({ params }: { params: Promise<{ i
                   {(s.travel_notes ?? '—').slice(0, 30)}
                   {(s.travel_notes?.length ?? 0) > 30 ? '…' : ''}
                 </td>
+                <td className="max-w-[180px] p-3 text-papa-muted" title={s.role === 'Lead Volunteer' ? (s.mailing_address ?? '') : ''}>
+                  {s.role === 'Lead Volunteer' ? ((s.mailing_address ?? '—').slice(0, 50) + ((s.mailing_address?.length ?? 0) > 50 ? '…' : '')) : '—'}
+                </td>
                 <td className="p-3">Confirmed</td>
                 <td className="p-3 text-papa-muted">{new Date(s.created_at).toLocaleString()}</td>
               </tr>
@@ -130,6 +134,9 @@ export default async function EventSignupsPage({ params }: { params: Promise<{ i
                 <td className="max-w-[120px] p-3 text-papa-muted" title={s.travel_notes ?? ''}>
                   {(s.travel_notes ?? '—').slice(0, 30)}
                   {(s.travel_notes?.length ?? 0) > 30 ? '…' : ''}
+                </td>
+                <td className="max-w-[180px] p-3 text-papa-muted" title={s.role === 'Lead Volunteer' ? (s.mailing_address ?? '') : ''}>
+                  {s.role === 'Lead Volunteer' ? ((s.mailing_address ?? '—').slice(0, 50) + ((s.mailing_address?.length ?? 0) > 50 ? '…' : '')) : '—'}
                 </td>
                 <td className="p-3 text-amber-600">Waitlist #{s.waitlist_position}</td>
                 <td className="p-3 text-papa-muted">{new Date(s.created_at).toLocaleString()}</td>
