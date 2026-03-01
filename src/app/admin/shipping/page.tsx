@@ -6,6 +6,7 @@ import {
   refreshShipment,
   removeShipment,
 } from "@/app/actions/shipping";
+import { LocalDateTime } from "@/components/LocalDateTime";
 import { CARRIERS } from "@/lib/types/database";
 import type { Shipment, ShipmentStatus } from "@/lib/types/database";
 
@@ -769,18 +770,11 @@ export default async function AdminShippingPage({ searchParams }: PageProps) {
                             })
                           : "—"}
                       </td>
-                      <td className="px-4 py-3 text-papa-muted">
-                        {s.last_checked_at
-                          ? new Date(s.last_checked_at).toLocaleString(
-                              "en-US",
-                              {
-                                month: "short",
-                                day: "numeric",
-                                hour: "numeric",
-                                minute: "2-digit",
-                              },
-                            )
-                          : "—"}
+                      <td className="px-4 py-3">
+                        <LocalDateTime
+                          isoDate={s.last_checked_at}
+                          className="text-papa-muted"
+                        />
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">

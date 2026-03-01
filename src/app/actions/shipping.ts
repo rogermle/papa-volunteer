@@ -89,7 +89,7 @@ export async function createShipment(prevState: unknown, formData?: FormData) {
   // Fetch tracking from Ship24 so the new row shows status/expected/latest update
   try {
     const statusResult = await trackPackage(trackingNumber, carrier)
-    const now = new Date().toISOString()
+    const now = new Date().toISOString() // UTC for consistency; UI displays in viewer's local time
     await supabase
       .from('shipments')
       .update({
@@ -147,7 +147,7 @@ export async function refreshShipment(prevState: unknown, formData?: FormData) {
     redirectWithError(err instanceof Error ? err.message : 'Failed to get tracking status.')
   }
 
-  const now = new Date().toISOString()
+  const now = new Date().toISOString() // UTC for consistency; UI displays in viewer's local time
   const { error } = await supabase
     .from('shipments')
     .update({
