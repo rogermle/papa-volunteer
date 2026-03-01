@@ -34,6 +34,8 @@ Fill in:
 - `NEXT_PUBLIC_SUPABASE_URL` – Supabase project URL
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` – Supabase anon key
 - `NEXT_PUBLIC_SITE_URL` – e.g. `http://localhost:3000` (used for OAuth redirects)
+- `SHIP24_API_KEY` – (optional) Required for Admin > Shipping: package tracking refresh. Get a key at [Ship24](https://www.ship24.com/); free tier is available.
+- `SHIP24_WEBHOOK_SECRET` – (optional) For real-time tracking updates: set this to the Webhook Secret from [Ship24 dashboard > Integrations > Webhook](https://dashboard.ship24.com/integrations/webhook/), and set the Webhook URL there to `https://<your-domain>/api/webhooks/ship24`. Without this, updates only appear when an admin clicks Refresh. For local testing use a tunnel (e.g. ngrok) and point the dashboard at it.
 
 ### 4. Make yourself an admin
 

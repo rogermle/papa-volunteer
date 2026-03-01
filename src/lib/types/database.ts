@@ -73,7 +73,9 @@ export interface EventSignup {
   created_at: string
 }
 
-export type Carrier = 'USPS'
+export type Carrier = 'USPS' | 'UPS' | 'FEDEX' | 'DHL'
+
+export const CARRIERS: Carrier[] = ['USPS', 'UPS', 'FEDEX', 'DHL']
 
 export type ShipmentStatus =
   | 'Pre-Shipment'
