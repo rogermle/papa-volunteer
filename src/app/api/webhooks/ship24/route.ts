@@ -94,8 +94,8 @@ export async function POST(request: Request) {
     const normalized = normalizeTrackingNumber(trackingNumber)
     if (!normalized) continue
 
-    let row: { id: string; tracking_number: string; status_raw: unknown } | null =
-      null
+    type ShipmentRow = { id: string; tracking_number: string; status_raw: unknown }
+    let row: ShipmentRow | null = null
 
     const { data: exact } = await supabase
       .from('shipments')
@@ -104,7 +104,7 @@ export async function POST(request: Request) {
       .maybeSingle()
 
     if (exact) {
-      row = exact as typeof row
+      row = exact as ShipmentRow
     }
 
     if (!row) {
