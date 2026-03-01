@@ -39,9 +39,8 @@ export default async function EditShipmentPage({
     .single();
   if (!shipment) notFound();
 
-  const paramsResolved = await (typeof searchParams?.then === "function"
-    ? searchParams
-    : Promise.resolve(searchParams ?? {}));
+  const paramsResolved =
+    searchParams instanceof Promise ? await searchParams : searchParams ?? {};
   const errorMessage =
     typeof paramsResolved?.error === "string" ? paramsResolved.error : null;
 
