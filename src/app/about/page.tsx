@@ -69,6 +69,9 @@ export default function AboutPage() {
               >
                 roger@asianpilots.org
               </a>
+              <p className="mt-1 text-sm text-papa-muted">
+                @rogerle on <a href="https://discord.com/users/1234567890123456789" className="text-papa-navy underline hover:text-papa-accent">Discord</a>
+              </p>
             </p>
             <p className="mt-1 text-sm text-papa-muted">
               Volunteer for PAPA and Software Developer
