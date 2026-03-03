@@ -65,6 +65,7 @@ export interface EventSignup {
   phone: string | null
   is_local: boolean | null
   flight_voucher_requested: boolean | null
+  flight_voucher_contacted: boolean | null
   availability_notes: string | null
   travel_notes: string | null
   mailing_address: string | null
