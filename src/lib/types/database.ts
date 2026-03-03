@@ -37,6 +37,7 @@ export interface Event {
   volunteer_details: string | null
   volunteer_schedule: VolunteerScheduleRow[]
   capacity: number
+  archived: boolean
   created_at: string
   updated_at: string
 }

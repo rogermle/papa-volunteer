@@ -44,9 +44,12 @@ export default async function EditShipmentPage({
   const errorMessage =
     typeof paramsResolved?.error === "string" ? paramsResolved.error : null;
 
+  const todayStr = new Date().toISOString().slice(0, 10);
   const { data: allEvents } = await supabase
     .from("events")
     .select("id, title, start_date")
+    .gte("end_date", todayStr)
+    .eq("archived", false)
     .order("start_date", { ascending: true });
 
   const formEventIds = (allEvents ?? []).map((e) => e.id);

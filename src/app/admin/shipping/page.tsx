@@ -441,10 +441,13 @@ export default async function AdminShippingPage({ searchParams }: PageProps) {
     }
   }
 
-  // All events for the Add-shipment dropdown (earliest first), plus lead volunteers per event
+  // All events for the Add-shipment dropdown (upcoming, non-archived, earliest first), plus lead volunteers per event
+  const todayStr = new Date().toISOString().slice(0, 10);
   const { data: allEvents } = await supabase
     .from("events")
     .select("id, title, start_date")
+    .gte("end_date", todayStr)
+    .eq("archived", false)
     .order("start_date", { ascending: true });
 
   const formEventIds = (allEvents ?? []).map((e) => e.id);

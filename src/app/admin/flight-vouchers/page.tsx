@@ -62,6 +62,7 @@ export default async function AdminFlightVouchersPage({ searchParams }: PageProp
     .from('events')
     .select('id, title, start_date')
     .in('id', eventIds)
+    .eq('archived', false)
     .order('start_date', { ascending: true })
 
   const { data: profiles } =

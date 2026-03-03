@@ -40,6 +40,7 @@ function parseFormEvent(formData: FormData) {
     volunteer_schedule = []
   }
   const capacity = parseInt(String(formData.get('capacity')), 10)
+  const archived = formData.get('archived') === 'on' || formData.get('archived') === 'true'
   if (!title || !start_date || !end_date || !timezone || TIMEZONES.includes(timezone) === false || capacity < 1) {
     return { error: 'Missing or invalid fields.' }
   }
@@ -58,6 +59,7 @@ function parseFormEvent(formData: FormData) {
     volunteer_details,
     volunteer_schedule,
     capacity,
+    archived,
   }
 }
 
@@ -90,6 +92,22 @@ export async function updateEvent(_prevState: unknown, formData: FormData) {
   const parsed = parseFormEvent(formData)
   if ('error' in parsed) return parsed
   const { error } = await supabase.from('events').update(parsed).eq('id', eventId)
+  if (error) return { error: error.message }
+  revalidatePath('/admin/events')
+  revalidatePath('/events')
+  revalidatePath('/calendar')
+  revalidatePath(`/events/${eventId}`)
+  return { ok: true }
+}
+
+export async function setEventArchived(eventId: string, archived: boolean) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized.' }
+  const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single()
+  if (!profile?.is_admin) return { error: 'Admins only.' }
+  if (!eventId) return { error: 'Missing event.' }
+  const { error } = await supabase.from('events').update({ archived }).eq('id', eventId)
   if (error) return { error: error.message }
   revalidatePath('/admin/events')
   revalidatePath('/events')

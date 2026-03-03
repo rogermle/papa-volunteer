@@ -3,13 +3,18 @@ import { createClient } from "@/lib/supabase/server";
 import { TIMEZONE_LABELS, formatTimeLocal } from "@/lib/types/database";
 import type { Timezone } from "@/lib/types/database";
 
+const today = () => new Date().toISOString().slice(0, 10);
+
 export default async function EventsListPage() {
   const supabase = await createClient();
+  const todayStr = today();
   const { data: events } = await supabase
     .from("events")
     .select(
       "id, title, start_date, end_date, start_time, end_time, timezone, location, capacity, image_url",
     )
+    .gte("end_date", todayStr)
+    .eq("archived", false)
     .order("start_date", { ascending: true });
 
   const eventIds = (events ?? []).map((e) => e.id);

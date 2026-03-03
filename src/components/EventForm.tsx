@@ -481,6 +481,20 @@ export function EventForm({ event }: Props) {
           className="papa-form-input w-full rounded bg-background px-3 py-2 text-foreground"
         />
       </div>
+      {isEdit && (
+        <div className="flex items-center gap-2">
+          <input
+            id="archived"
+            name="archived"
+            type="checkbox"
+            defaultChecked={event?.archived ?? false}
+            className="h-4 w-4 rounded border-papa-form-border"
+          />
+          <label htmlFor="archived" className="text-sm papa-form-label">
+            Archived (hide from default event lists; data kept for reporting)
+          </label>
+        </div>
+      )}
       <div className="flex flex-wrap gap-3 border-t-2 border-papa-form-border pt-4">
         <button
           type="submit"
