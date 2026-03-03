@@ -27,7 +27,7 @@ export default function AboutPage() {
         <p className="mt-2 text-sm text-papa-muted">
           PAPA Volunteer helps volunteers sign up for tabling events run by{" "}
           <a
-            href="https://www.asianpilots.org"
+            href="https://www.fapa.aero"
             target="_blank"
             rel="noopener noreferrer"
             className="text-papa-navy underline hover:text-papa-accent"
@@ -63,7 +63,15 @@ export default function AboutPage() {
           <div className="min-w-0">
             <p className="font-medium text-foreground">Roger Le</p>
             <p className="mt-1 text-sm text-papa-muted">
-              Volunteer and developer for PAPA.
+              <a
+                href="mailto:roger@asianpilots.org"
+                className="text-papa-navy underline hover:text-papa-accent"
+              >
+                roger@asianpilots.org
+              </a>
+            </p>
+            <p className="mt-1 text-sm text-papa-muted">
+              Volunteer for PAPA and Software Developer
             </p>
             <a
               href="https://www.linkedin.com/in/rogermle"
