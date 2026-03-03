@@ -69,6 +69,9 @@ export function VolunteerSignupForm({
       ? (initialValues.role as SignupRole)
       : "Volunteer"
   );
+  const [flightVoucherChecked, setFlightVoucherChecked] = useState(
+    !!(isEdit && initialValues?.flight_voucher_requested)
+  );
   const router = useRouter();
 
   async function handleSubmit(formData: FormData) {
@@ -258,7 +261,8 @@ export function VolunteerSignupForm({
             id="flight_voucher_requested"
             name="flight_voucher_requested"
             value="on"
-            defaultChecked={isEdit ? (initialValues?.flight_voucher_requested ?? false) : false}
+            checked={flightVoucherChecked}
+            onChange={(e) => setFlightVoucherChecked(e.target.checked)}
             className="h-4 w-4 rounded border-papa-border text-papa-navy"
           />
           <label
@@ -269,6 +273,49 @@ export function VolunteerSignupForm({
           </label>
         </div>
       </div>
+      {flightVoucherChecked && (
+        <div
+          className="mt-3 rounded-xl border border-papa-navy/30 bg-papa-card p-4"
+          role="region"
+          aria-labelledby="flight-voucher-next-step"
+        >
+          <h4
+            id="flight-voucher-next-step"
+            className="text-sm font-semibold text-foreground"
+          >
+            Next step: contact the team
+          </h4>
+          <p className="mt-2 text-sm text-foreground">
+            <span className="font-semibold text-papa-navy">
+              Please start a Discord group chat with all 3 of us: @Richard Couture, @Terry Tran, and @Ronald Yang
+            </span>{" "}
+            to learn more about the flight voucher process and requirements.
+          </p>
+          <p className="mt-2 text-sm text-papa-muted">
+            Or  or email all 3 of US at :{" "}
+            <a
+              href="mailto:richard@asianpilots.org"
+              className="text-papa-navy underline hover:text-papa-accent"
+            >
+              richard@asianpilots.org
+            </a>
+            ,{" "}
+            <a
+              href="mailto:terry@asianpilots.org"
+              className="text-papa-navy underline hover:text-papa-accent"
+            >
+              terry@asianpilots.org
+            </a>
+            ,{" "}
+            <a
+              href="mailto:ronald@asianpilots.org"
+              className="text-papa-navy underline hover:text-papa-accent"
+            >
+              ronald@asianpilots.org
+            </a>
+          </p>
+        </div>
+      )}
       <div className="mt-4">
         <label
           htmlFor="availability_notes"
