@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Header } from "@/components/Header";
 import { createClient } from "@/lib/supabase/server";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,7 +17,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "PAPA Volunteer",
-  description: "Professional Asian Pilots Association – volunteer signup and event calendar",
+  description:
+    "Professional Asian Pilots Association – volunteer signup and event calendar",
 };
 
 export default async function RootLayout({
@@ -44,6 +46,7 @@ export default async function RootLayout({
       >
         <Header initialAdmin={!!initialAdmin} />
         <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
+        <Analytics />
       </body>
     </html>
   );
