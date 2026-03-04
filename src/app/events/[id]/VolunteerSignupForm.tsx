@@ -269,7 +269,7 @@ export function VolunteerSignupForm({
             htmlFor="flight_voucher_requested"
             className="text-sm text-foreground"
           >
-            I am requesting a flight voucher for this event
+            I would like to apply for an opportunity to earn a flight voucher
           </label>
         </div>
       </div>
