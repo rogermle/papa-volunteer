@@ -10,6 +10,7 @@ import { fetchForecast, getEventForecastDateRange } from '@/lib/weather'
 import { WeatherForecast } from '@/components/WeatherForecast'
 import { EventActionBanner } from './EventActionBanner'
 import { EventSignupButtons } from './EventSignupButtons'
+import { EventPageViewTracker } from './EventPageViewTracker'
 
 export const dynamic = 'force-dynamic'
 
@@ -103,6 +104,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
 
   return (
     <div className="flex flex-col gap-6">
+      <EventPageViewTracker eventId={id} />
       <Link href="/events" className="text-sm text-papa-muted hover:text-papa-navy hover:underline">
         ← Back to events
       </Link>

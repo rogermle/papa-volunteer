@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import posthog from 'posthog-js'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { leaveEvent } from '@/app/actions/signup'
@@ -239,7 +240,10 @@ export function EventSignupButtons({ eventId, capacity, confirmedCount, mySignup
   return (
     <button
       type="button"
-      onClick={() => setShowSignupForm(true)}
+      onClick={() => {
+        posthog.capture('signup_started', { event_id: eventId })
+        setShowSignupForm(true)
+      }}
       className="rounded bg-papa-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-papa-accent-hover"
     >
       {full ? 'Join waitlist' : 'Sign up to volunteer'}

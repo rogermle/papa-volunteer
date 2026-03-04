@@ -1,5 +1,6 @@
 'use client'
 
+import posthog from 'posthog-js'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { leaveEvent } from '@/app/actions/signup'
@@ -21,6 +22,7 @@ export function CancelSignupButton({ eventId }: Props) {
       setError(result.error ?? 'Something went wrong.')
       return
     }
+    posthog.capture('signup_cancelled', { event_id: eventId })
     router.refresh()
   }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import posthog from "posthog-js";
 import { useState, useRef, useEffect } from "react";
 
 type Message = { role: "user" | "assistant"; content: string };
@@ -10,6 +11,10 @@ export function ChatUI() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    posthog.capture("faq_chat_opened");
+  }, []);
 
   useEffect(() => {
     scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);

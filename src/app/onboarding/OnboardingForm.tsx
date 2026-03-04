@@ -1,6 +1,7 @@
 'use client'
 
 import { completeOnboarding } from '@/app/actions/onboarding'
+import posthog from 'posthog-js'
 
 type Props = {
   defaultDisplayName: string
@@ -9,7 +10,11 @@ type Props = {
 
 export function OnboardingForm({ defaultDisplayName, next }: Props) {
   return (
-    <form action={completeOnboarding} className="mt-6 flex flex-col gap-4">
+    <form
+      action={completeOnboarding}
+      className="mt-6 flex flex-col gap-4"
+      onSubmit={() => posthog.capture('onboarding_completed')}
+    >
       <input type="hidden" name="next" value={next} />
       <div>
         <label htmlFor="display_name" className="mb-1 block text-sm font-medium text-foreground">

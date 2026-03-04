@@ -36,6 +36,8 @@ Fill in:
 - `NEXT_PUBLIC_SITE_URL` – e.g. `http://localhost:3000` (used for OAuth redirects)
 - `SHIP24_API_KEY` – (optional) Required for Admin > Shipping: package tracking refresh. Get a key at [Ship24](https://www.ship24.com/); free tier is available.
 - `SHIP24_WEBHOOK_SECRET` – (optional) For real-time tracking updates: set this to the Webhook Secret from [Ship24 dashboard > Integrations > Webhook](https://dashboard.ship24.com/integrations/webhook/), and set the Webhook URL there to `https://<your-domain>/api/webhooks/ship24`. Without this, updates only appear when an admin clicks Refresh. For local testing use a tunnel (e.g. ngrok) and point the dashboard at it.
+- `NEXT_PUBLIC_POSTHOG_KEY` – (optional) PostHog project API key for analytics. Get it from [PostHog project settings](https://app.posthog.com/project/settings). If unset, analytics are no-op.
+- `NEXT_PUBLIC_POSTHOG_HOST` – (optional) PostHog host, e.g. `https://us.i.posthog.com` (or EU host). Required for PostHog if you set the key.
 
 ### 4. Make yourself an admin
 
@@ -120,6 +122,8 @@ For this stack (Next.js + Supabase), **Vercel** is the simplest and most reliabl
    | `SUPABASE_SERVICE_ROLE_KEY` | your service_role key | Same place; **keep secret** (server-only, for chat log + FAQ RAG) |
    | `OPENAI_API_KEY` | your OpenAI API key | Required for FAQ chat; server-only |
    | `NEXT_PUBLIC_SITE_URL` | `https://your-app.vercel.app` | Your Vercel URL (no trailing slash). Update after first deploy if needed (step 6). |
+   | `NEXT_PUBLIC_POSTHOG_KEY` | (optional) PostHog project key | Analytics; from [PostHog project settings](https://app.posthog.com/project/settings). |
+   | `NEXT_PUBLIC_POSTHOG_HOST` | `https://us.i.posthog.com` | PostHog host (required if using PostHog). |
 
    - Apply to **Production** (and optionally Preview if you want branch previews to work with auth).
 

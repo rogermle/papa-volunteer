@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import posthog from "posthog-js";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -29,6 +30,7 @@ export function Header({ initialAdmin = false }: HeaderProps) {
     client.auth.getUser().then(({ data: { user: u } }) => {
       setUser(u ?? null);
       if (u) {
+        posthog.identify(u.id);
         client
           .from("profiles")
           .select("discord_username, display_name, is_admin")
@@ -40,6 +42,7 @@ export function Header({ initialAdmin = false }: HeaderProps) {
             setProfile(data ?? null);
           });
       } else {
+        posthog.reset();
         setProfile(null);
       }
     });

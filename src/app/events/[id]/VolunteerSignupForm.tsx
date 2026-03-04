@@ -1,5 +1,6 @@
 "use client";
 
+import posthog from "posthog-js";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signUpForEvent, updateSignup } from "@/app/actions/signup";
@@ -95,9 +96,12 @@ export function VolunteerSignupForm({
       onSaved?.();
       return;
     }
-    setSuccess(
-      result && "waitlist" in result && result.waitlist ? "waitlist" : "signed_up"
-    );
+    const isWaitlist = !!(result && "waitlist" in result && result.waitlist);
+    posthog.capture("signup_completed", { event_id: eventId, waitlist: isWaitlist });
+    if (formData.get("flight_voucher_requested") === "on") {
+      posthog.capture("flight_voucher_requested", { event_id: eventId });
+    }
+    setSuccess(isWaitlist ? "waitlist" : "signed_up");
     router.refresh();
   }
 
